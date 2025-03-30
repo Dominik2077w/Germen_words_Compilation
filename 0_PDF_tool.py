@@ -46,7 +46,7 @@ def split_pdf(pdf_path: str, page_numbers: List[int]) -> None:
         
 
     except Exception as e:
-        
+        print(e)
 
 if __name__ == "__main__":
     # 示例用法

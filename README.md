@@ -6,6 +6,10 @@
 - 网址:https://github.com/Dominik2077w/Germen_words_Compilation.git
 - 或使用命令 git clone https://github.com/Dominik2077w/Germen_words_Compilation.git
 ```
+## 依赖库
+```
+- pip install pdfplumber stanza openai-whisper PyPDF2 transformers sentencepiece
+```
 
 
 ## 使用步骤
