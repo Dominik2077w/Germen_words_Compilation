@@ -2,8 +2,11 @@
 - 原因在德语课堂上会遇到新的没有见过的单词，但是课堂上很难有时间去记录和查阅。(就算用同声传译也很难标记下来，谁会课后去看字幕呢？)
 - 于是我们尝试，课堂上用小米手机同声传译纯看德语字幕。课后导出字幕文件，结合课堂上使用的资料文件，自动化地提取出课堂上出现过的单词和没有出现过的单词。以供复习。
 ## 如何下载
+```如何下载
 - 网址:https://github.com/Dominik2077w/Germen_words_Compilation.git
 - 或使用命令 git clone https://github.com/Dominik2077w/Germen_words_Compilation.git
+```
+
 
 ## 使用步骤
 - 1 .使用者应该按照如图结构在Data目录下构建自己的文件夹结构，并将资料文件(md/非扫描版pdf)放入对应文件夹![img_3.png](Cashes/img_3.png)
