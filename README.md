@@ -8,7 +8,7 @@
 ```
 ## 依赖库
 ```
-- pip install pdfplumber stanza openai-whisper PyPDF2 transformers sentencepiece
+- pip install -r requirements.txt
 ```
 
 
