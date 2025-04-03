@@ -8,7 +8,7 @@
 ```
 ## 依赖库
 ```
-- pip install -r requirements.txt
+pip install -r requirements.txt #使用Python 3.12, Python 3.13有兼容问题
 ```
 
 
