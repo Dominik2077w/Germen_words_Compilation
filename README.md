@@ -16,7 +16,6 @@ pip install -r requirements.txt #使用Python 3.12, Python 3.13有兼容问题
 - 1 .使用者应该按照如图结构在python项目目录下构建自己的文件夹结构，并将资料文件(md/非扫描版pdf)放入对应文件夹!
 - ![img.png](Cashes/img.png)
 - 2 .启动程序，等待完成计算。
-- ![img_1.png](Cashes/img_1.png)
 - 3 .计算完成后，对应目录下会生成neue_wörter文件与alte_wörter文件
 - ![img_2.png](Cashes/img_2.png)
 - 4 .示例neue_wörter文件:
