@@ -1,10 +1,11 @@
+import json
 import os
 import warnings
 
 from Methode import classify, count_dict_add, get_sorted_abs_part_subdir, Constants, count_dict_add_dict, \
     extract_word_dict_from_docx, translate_to_chi, MdFormat, get_noun_gender, my_print1, my_print2, my_print3
 
-warnings.filterwarnings("ignore")  # 忽略所有警告
+#warnings.filterwarnings("ignore")  # 忽略所有警告
 
 
 class Project:
@@ -118,11 +119,16 @@ class Part:
             return self.used_dict_for_classify[key]
         else:
             info = classify(key)
+            if key =='selbst':
+                print(f'no in {key} {info}')
+                print(f'no in {key} {info}')
+                print(f'no in {key} {info}')
+                print(f'no in {key} {info}')
             self.used_dict_for_classify[key] = info
             return info
 
     def load_used_dict_for_classify(self, key):
-        self.used_dict_for_classify[key] = key
+        self.used_dict_for_classify[key] = classify(key)
 
     def get_or_add_used_dict_for_gender(self, key):
         if key in self.used_dict_for_gender:
@@ -153,24 +159,23 @@ class Part:
         my_print3(f'--*saved_{os.path.join(self.abs_path, name)}', 1)
 
     def read_new_md(self):
-        classified_dict_in_new, translated_dict_in_new = dict(), dict()
         with open(os.path.join(self.abs_path, Constants.New_), 'r', encoding='utf-8') as f:
             lines = f.readlines()
             end = len(lines)
             cur = 0
             for line in lines:
                 if line.startswith('-'):
-                    line = line[2:]
+                    line = line[2:].replace('\n', '')
                     words = line.split(" ")
                     if len(words) < 4:
-                        self.load_used_dict_for_classify(words[1])
-                        self.load_used_dict_for_translate(words[1], words[2])
+                        self.load_used_dict_for_classify(words[-2])
+                        self.load_used_dict_for_translate(words[-2], words[-1])
                         cur += 1
                         my_print3(f'-*reading-({cur}/{end}){line}')
                     else:
-                        self.load_used_dict_for_classify(words[2])
-                        self.load_used_dict_for_translate(words[2], words[3])
-                        self.load_used_dict_for_gender(words[2], words[1])
+                        self.load_used_dict_for_classify(words[-2])
+                        self.load_used_dict_for_translate(words[-2], words[-1])
+                        self.load_used_dict_for_gender(words[-2], words[-3])
                         cur += 1
                         my_print3(f'-*reading-({cur}/{end}){line}')
         my_print3(f'-*reading-done-({cur}/{end})', 1)

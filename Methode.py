@@ -5,7 +5,7 @@ import warnings
 import pdfplumber
 import stanza
 
-stanza.download('de')
+stanza.download('de', package='de_hdt_large')
 nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma')
 
 from transformers import MarianMTModel, MarianTokenizer
@@ -206,4 +206,4 @@ def classify(deu):
 
 
 if __name__ == '__main__':
-    print(get_noun_gender('Abgas'))
+    print(classify('selbst'))
