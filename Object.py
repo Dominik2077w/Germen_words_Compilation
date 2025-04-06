@@ -1,11 +1,10 @@
-import json
 import os
 import warnings
 
 from Methode import classify, count_dict_add, get_sorted_abs_part_subdir, Constants, count_dict_add_dict, \
     extract_word_dict_from_docx, translate_to_chi, MdFormat, get_noun_gender, my_print1, my_print2, my_print3
 
-#warnings.filterwarnings("ignore")  # 忽略所有警告
+warnings.filterwarnings("ignore")  # 忽略所有警告
 
 
 class Project:
@@ -119,7 +118,7 @@ class Part:
             return self.used_dict_for_classify[key]
         else:
             info = classify(key)
-            if key =='selbst':
+            if key == 'selbst':
                 print(f'no in {key} {info}')
                 print(f'no in {key} {info}')
                 print(f'no in {key} {info}')
@@ -195,18 +194,18 @@ class Part:
 
     def structure_dict(self, classified_and_gathered_dict):
         structured_dict = dict()
-        end=len(classified_and_gathered_dict)
-        cur=0
+        end = len(classified_and_gathered_dict)
+        cur = 0
         for key, value in classified_and_gathered_dict.items():
             info = self.get_or_add_used_dict_for_classify(key)
             if info.upos == 'NOUN':
                 info.lemma = info.lemma.capitalize()
             if info.upos not in structured_dict:
                 structured_dict[info.upos] = list()
-            chi=self.get_or_add_used_dict_for_translate(info.lemma)
-            gen=self.get_or_add_used_dict_for_gender(info.lemma)
+            chi = self.get_or_add_used_dict_for_translate(info.lemma)
+            gen = self.get_or_add_used_dict_for_gender(info.lemma)
             structured_dict[info.upos].append(
-                MdFormat(value,info.lemma, chi,gen))
+                MdFormat(value, info.lemma, chi, gen))
             cur += 1
             my_print3(f'-*structuring-({cur}/{end}){info.lemma}==>{info.upos} {chi}')
         my_print3(f'-*structuring-done-({cur}/{end})', 1)
