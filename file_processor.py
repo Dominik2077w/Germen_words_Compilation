@@ -56,13 +56,13 @@ def sort_subdirs_by_date(relative_path, cutoff_date="19491001"):
         used_dict_for_translate = dict()
         for date_obj, dir_name in sorted_dirs:
             full_path = os.path.join(target_dir, dir_name)
-            print(" "*5 + "~/",dir_name)
+            print(" " * 5 + "~/", dir_name)
             time.sleep(0.1)
             md_file = os.path.join(full_path, "Neue_Wörter.md")
             if date_obj < cutoff_date_obj:
                 try:
                     words = extract_unique_german_words(md_file)
-                    print(" "*5+"- ","get_new_words:", len(words))
+                    print(" " * 5 + "- ", "get_new_words:", len(words))
                     time.sleep(0.1)
                     history_unclassified_set.update(words)
                     print(" " * 5 + "- ", "classify_new_words:", len(words))
@@ -75,7 +75,7 @@ def sort_subdirs_by_date(relative_path, cutoff_date="19491001"):
                     print(f"警告：{md_file} 文件不存在")
             else:
                 current_unclassified_set = from_md_to_germen_set(full_path)
-                print(" " * 10 + "- fetched",len(current_unclassified_set),"words")
+                print(" " * 10 + "- fetched", len(current_unclassified_set), "words")
                 new_dict_for_md = classify_german_new_words(current_unclassified_set - history_unclassified_set,
                                                             used_dict_for_classify)
                 old_dict_for_md = classify_german_old_words(current_unclassified_set & history_unclassified_set,
@@ -119,7 +119,7 @@ def save_md(relative_path, data_set, filename):
 
             f.write(data_set)
 
-        print(" " * 10 + "- ",f"{filename} saved")
+        print(" " * 10 + "- ", f"{filename} saved")
 
     except Exception as e:
         print(f"保存文件失败: {str(e)}")

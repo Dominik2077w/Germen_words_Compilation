@@ -4,6 +4,8 @@ import pdfplumber  # 替代 PyPDF2
 
 import warnings
 
+
+
 def extract_words_from_pdf(pdf_path):
     # 使用 warnings.catch_warnings() 上下文管理器
     import logging
@@ -27,7 +29,10 @@ def extract_unique_german_words(file_path):
     :return: 不重复的德语单词列表
     """
     german_words = set()
-    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    german_characters = (
+    "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyz"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+)
 
     if file_path.endswith(".md"):
         with open(file_path, 'r', encoding='utf-8') as file:
@@ -57,6 +62,7 @@ def extract_unique_german_words(file_path):
 import os
 
 
+
 def from_md_to_germen_set(relative_path):
     """
     处理指定目录下的所有.md文件，汇总德语单词
@@ -80,7 +86,7 @@ def from_md_to_germen_set(relative_path):
                 try:
                     german_words.update(extract_unique_german_words(file_path))
 
-                except Exception as e:
+                except Exception:
                     pass
 
     return german_words
