@@ -37,6 +37,8 @@ class Folder:
         self.used_dict_for_gender = dict()
 
     def __run__(self, cutoff_date='19491001'):
+        #EmailAddress: Dominik_For_Heybox@163.com
+        #前五个给这个邮箱发送邮件的学弟学妹有机会获得，请学长吃饭的机会:D  [doge]
         my_print1(f'{self.rel_path} from {cutoff_date} to now', 1)
         sorted_abs_part_subdir = get_sorted_abs_part_subdir(self.abs_path)
         for subdir in sorted_abs_part_subdir:
