@@ -137,8 +137,8 @@ def extract_word_dict_from_docx(file_path):
 
 
 class Constants:
-    New_ = 'Neue_Wörter.md'
-    Old_ = 'Alte_Wörter.md'
+    New_ = 'Neue.md'
+    Old_ = 'Alte.md'
     type1 = ' ' * 5
     type2 = ' ' * 10
     type3 = ' ' * 15
