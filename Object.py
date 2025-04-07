@@ -118,11 +118,6 @@ class Part:
             return self.used_dict_for_classify[key]
         else:
             info = classify(key)
-            if key == 'selbst':
-                print(f'no in {key} {info}')
-                print(f'no in {key} {info}')
-                print(f'no in {key} {info}')
-                print(f'no in {key} {info}')
             self.used_dict_for_classify[key] = info
             return info
 
