@@ -8,33 +8,68 @@ import stanza
 stanza.download('de', package='de_hdt_large')
 nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma')
 
-from transformers import MarianMTModel, MarianTokenizer
+import requests
+import random
+import hashlib
+import json
 
-model_name = "Helsinki-NLP/opus-mt-de-zh"
-tokenizer = MarianTokenizer.from_pretrained(model_name)
-model = MarianMTModel.from_pretrained(model_name)
+# 全局变量 - 替换为你自己的百度翻译API凭证
+APP_ID = ''
+SECRET_KEY = ''
 
 
 def translate_to_chi(text):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    """
+    使用百度翻译API将德语文本翻译成中文
 
-    outputs = model.generate(
-        **inputs,
-        max_length=100,
-        num_beams=4,
-        no_repeat_ngram_size=2,
-        early_stopping=True,
-        length_penalty=1.5,
-        temperature=0.7,  # 降低输出的随机性
-        top_k=50,  # 限制候选词数量
-        top_p=0.95,  # 核采样阈值
-    )
+    参数:
+        text (str): 要翻译的德语文本
 
-    # 后处理
-    translated = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # 移除可能的重复和None
-    translated = "".join(dict.fromkeys(translated.split())) if translated else ""
-    return translated
+    返回:
+        str: 翻译后的中文文本
+        str: 如果翻译失败返回空字符串(与原函数行为一致)
+    """
+    # 百度翻译API的URL
+    url = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
+
+    # 源语言为德语(de)，目标语言为中文(zh)
+    from_lang = 'de'
+    to_lang = 'zh'
+
+    # 生成随机数
+    salt = random.randint(32768, 65536)
+
+    # 计算签名
+    sign_str = APP_ID + text + str(salt) + SECRET_KEY
+    sign = hashlib.md5(sign_str.encode()).hexdigest()
+
+    # 构造请求参数
+    params = {
+        'q': text,
+        'from': from_lang,
+        'to': to_lang,
+        'appid': APP_ID,
+        'salt': salt,
+        'sign': sign
+    }
+
+    try:
+        # 发送请求
+        response = requests.get(url, params=params)
+        result = json.loads(response.text)
+
+        # 解析结果
+        if 'trans_result' in result:
+            translated = result['trans_result'][0]['dst']
+            # 保持与原函数相同的后处理(虽然百度API通常不需要)
+            return "".join(dict.fromkeys(translated.split())) if translated else ""
+        else:
+            print(f"翻译失败: {result.get('error_msg', '未知错误')}")
+            return ""
+
+    except Exception as e:
+        print(f"请求翻译API时出错: {str(e)}")
+        return ""
 
 
 class MdFormat:
