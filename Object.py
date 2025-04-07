@@ -36,7 +36,7 @@ class Folder:
         self.used_dict_for_translate = dict()
         self.used_dict_for_gender = dict()
 
-    def __run__(self, cutoff_date='        '):
+    def __run__(self, cutoff_date='        ALL'):
         #EmailAddress: Dominik_For_Heybox@163.com
         #前五个给这个邮箱发送邮件的学弟学妹有机会获得，请学长吃饭的机会:D  [doge]
         my_print1(f'{self.rel_path} from {cutoff_date} to now', 1)
