@@ -127,7 +127,7 @@ class Part:
         for root, dirs, files in os.walk(self.abs_path):
             for file in files:
                 if (file.lower().endswith('.md') and not file.endswith(Constants.New_) and not file.endswith(
-                        Constants.Old_)) or file.lower().endswith('.pdf'):
+                        Constants.Old_)) or file.lower().endswith('.pdf') or file.lower().endswith('.txt'):
                     file_path = os.path.join(root, file)
                     current_file_count_dict = extract_word_dict_from_docx(file_path)
                     my_print3(f'   --*reading_{len(current_file_count_dict)}_words_in_{file}', 1)

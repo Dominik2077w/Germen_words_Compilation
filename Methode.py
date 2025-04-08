@@ -154,7 +154,7 @@ def extract_word_dict_from_docx(file_path):
     """
     german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-    if file_path.endswith(".md"):
+    if file_path.endswith(".md") or file_path.endswith(".txt"):
         with open(file_path, 'r', encoding='utf-8') as file:
             words = file.read().split(" ")
     elif file_path.endswith(".pdf"):
