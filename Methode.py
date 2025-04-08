@@ -14,8 +14,8 @@ import hashlib
 import json
 
 # 全局变量 - 替换为你自己的百度翻译API凭证
-APP_ID = '20250408002326826'
-SECRET_KEY = '8jTz7wHTNWeX1rfaQFoV'
+APP_ID = ''
+SECRET_KEY = ''
 
 
 def translate_to_chi(text):
