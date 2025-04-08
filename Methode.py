@@ -135,7 +135,7 @@ def process_words(txt, german_characters):
              '~', '`', '\'', '&', '%', '^', '(', ')', '{', '}', '[', ']', '+', '=']
     for i in relib:
         txt = txt.replace(i, ' ')
-    
+
     words = txt.split(' ')
     for word in words:
         if word == "":
