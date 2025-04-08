@@ -268,7 +268,10 @@ def classify(deu):
     for sent in doc.sentences:
         for token in sent.tokens:
             for word_info in token.words:
-                return word_info
+                returns = InfoKopy(word_info.lemma, word_info.upos)
+                if returns.upos == 'NOUN':
+                    returns.lemma = returns.lemma.capitalize()
+                return returns
 
 
 class UsedDict:
@@ -284,5 +287,12 @@ class UsedDict:
             json.dump(data, file, ensure_ascii=False, indent=4)
 
 
+class InfoKopy:
+    def __init__(self, lemma, upos):
+        self.lemma = lemma
+        self.upos = upos
+
+
 if __name__ == '__main__':
-    print(classify('selbst'))
+    print(translate_to_chi('Hobby'))
+    print(classify('Hobby').upos)

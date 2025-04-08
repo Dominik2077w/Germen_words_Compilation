@@ -159,15 +159,13 @@ class Part:
         if key in self.used_dict[group]:
             return self.used_dict[group][key]
         else:
-            if group == 'classify':
-                self.used_dict['classify'][key] = classify(key).lemma
-                self.used_dict['upos'][key] = classify(key).upos
+            if group == 'classify' or group == 'upos':
+                info = classify(key)
+                self.used_dict['classify'][key] = info.lemma
+                self.used_dict['upos'][key] = info.upos
 
             elif group == 'translate':
                 self.used_dict[group][key] = translate_to_chi(key)
-            elif group == 'upos':
-                self.used_dict['upos'][key] = classify(key).upos
-                self.used_dict['classify'][key] = classify(key).lemma
             else:
                 self.used_dict[group][key] = get_noun_gender(key)
             return self.used_dict[group][key]
