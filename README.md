@@ -17,7 +17,7 @@ pip install -r requirements.txt #使用Python 3.12, Python 3.13有兼容问题
 - ![img.png](Cashes/img.png)
 - 2 .在Methode.py中，填入你的百度翻译的API密钥和ID。如果没有的话，可以去百度翻译申请一个免费的API密钥和ID
 
-- 3 .启动程序，等待完成计算。计算完成后，对应目录下会生成neue_wörter文件与alte_wörter文件
+- 3 .启动程序，等待完成计算。计算完成后，对应目录下会生成neue文件与alte文件
 - ![img_2.png](Cashes/img_2.png)
 - 4 .示例neue_wörter文件:
 - ![img_3.png](Cashes/img_3.png)
@@ -27,8 +27,9 @@ pip install -r requirements.txt #使用Python 3.12, Python 3.13有兼容问题
 - Part类：接收一个绝对目录地址，创建一个Part对象。可以读取其中的所有md文件和pdf文件，负责信息加工和文件读写。
 ## 逻辑细节
 - folder级别的文件夹之间是相互独立的，互不影响
-- 计算得到的neue_wörter.md文件中，(记录了当前part文件夹中存在的，并且在更早的part文件夹中没有存在过的)词汇。并汇总成了序列。
-- 计算得到的alte_wörter.md文件中，(记录了当前part文件夹中存在的，并且在更早的part文件夹中已经存在过的)词汇。并汇总成了序列。
+  - used_dict.json文件中储存着使用过的翻译或还原数据，程序会优先调用这个文件中的数据，而不是重新计算。当在这个文件中找不到目标数据时，程序会自动调用百度翻译API进行翻译或还原，并将结果存入used_dict.json文件中。
+- 计算得到的neue.md文件中，(记录了当前part文件夹中存在的，并且在更早的part文件夹中没有存在过的)词汇。并汇总成了序列。
+- 计算得到的alte.md文件中，(记录了当前part文件夹中存在的，并且在更早的part文件夹中已经存在过的)词汇。并汇总成了序列。
 ## 启动方式
 - 1 . 通过Project类的__init__方法，传入一个本项目的通向Project层目录的相对路径(比如说Data)，创建一个Project对象，对全局重新计算以及覆盖保存
 ```

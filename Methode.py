@@ -72,6 +72,35 @@ def translate_to_chi(text):
         return ""
 
 
+from transformers import MarianMTModel, MarianTokenizer
+
+model_name = "Helsinki-NLP/opus-mt-de-zh"
+tokenizer = MarianTokenizer.from_pretrained(model_name)
+model = MarianMTModel.from_pretrained(model_name)
+
+
+def translate_to_chi1(text):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+
+    outputs = model.generate(
+        **inputs,
+        max_length=100,
+        num_beams=4,
+        no_repeat_ngram_size=2,
+        early_stopping=True,
+        length_penalty=1.5,
+        temperature=0.7,  # 降低输出的随机性
+        top_k=50,  # 限制候选词数量
+        top_p=0.95,  # 核采样阈值
+    )
+
+    # 后处理
+    translated = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # 移除可能的重复和None
+    translated = "".join(dict.fromkeys(translated.split())) if translated else ""
+    return translated
+
+
 class MdFormat:
     def __init__(self, count, deu, chi, gen):
         self.count = count
@@ -104,6 +133,7 @@ def process_words(words, german_characters):
     word_count_dict = {}
     for word in words:
         word = word.strip()
+        word = word.replace('\n', '')
         if word == "":
             continue
         if not re.match(f"^[{german_characters}]+$", word):
@@ -142,6 +172,7 @@ class Constants:
     type1 = ' ' * 5
     type2 = ' ' * 10
     type3 = ' ' * 15
+    UsedDictPath = 'used_dict.json'
 
 
 def my_print1(txt, enter=0):
@@ -238,6 +269,19 @@ def classify(deu):
         for token in sent.tokens:
             for word_info in token.words:
                 return word_info
+
+
+class UsedDict:
+    def __init__(self):
+        self.path = os.path.join(os.getcwd(), Constants.UsedDictPath)
+
+    def load(self):
+        with open(self.path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+
+    def save(self, data):
+        with open(self.path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':
