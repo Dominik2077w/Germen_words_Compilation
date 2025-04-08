@@ -14,8 +14,8 @@ import hashlib
 import json
 
 # 全局变量 - 替换为你自己的百度翻译API凭证
-APP_ID = ''
-SECRET_KEY = ''
+APP_ID = '20250408002326826'
+SECRET_KEY = '8jTz7wHTNWeX1rfaQFoV'
 
 
 def translate_to_chi(text):
@@ -124,16 +124,20 @@ def extract_words_from_pdf(pdf_path):
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
                 text = page.extract_text()
-                cleaned_text = text.replace('\n', ' ')
-                words += cleaned_text
+                words += ' '
+                words += text
     return words
 
 
-def process_words(words, german_characters):
+def process_words(txt, german_characters):
     word_count_dict = {}
+    relib = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", '\n', '\r', '\t', ':', ',', '.', '„', '“', '!', '#', '@',
+             '~', '`', '\'', '&', '%', '^', '(', ')', '{', '}', '[', ']', '+', '=']
+    for i in relib:
+        txt = txt.replace(i, ' ')
+    
+    words = txt.split(' ')
     for word in words:
-        word = word.strip()
-        word = word.replace('\n', '')
         if word == "":
             continue
         if not re.match(f"^[{german_characters}]+$", word):
@@ -152,18 +156,13 @@ def extract_word_dict_from_docx(file_path):
     :param file_path: markdown文件或pdf的路径
     :return: 记录单词出现次数的字典
     """
-    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-    if file_path.endswith(".md") or file_path.endswith(".txt"):
-        with open(file_path, 'r', encoding='utf-8') as file:
-            words = file.read().split(" ")
-    elif file_path.endswith(".pdf"):
-        line = extract_words_from_pdf(file_path)
-        words = line.split(" ")
+    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
+    if file_path.endswith(".pdf"):
+        txt = extract_words_from_pdf(file_path)
     else:
-        return {}
-
-    return process_words(words, german_characters)
+        with open(file_path, 'r', encoding='utf-8') as file:
+            txt = file.read()
+    return process_words(txt, german_characters)
 
 
 class Constants:
@@ -264,13 +263,11 @@ def classify(deu):
     global nlp
     if nlp is None:
         raise RuntimeError("请先安装德语模型，运行命令: stanza.download('de')")
-    doc = nlp(deu.lower())
+    doc = nlp(deu)
     for sent in doc.sentences:
         for token in sent.tokens:
             for word_info in token.words:
                 returns = InfoKopy(word_info.lemma, word_info.upos)
-                if returns.upos == 'NOUN':
-                    returns.lemma = returns.lemma.capitalize()
                 return returns
 
 
@@ -294,5 +291,7 @@ class InfoKopy:
 
 
 if __name__ == '__main__':
-    print(translate_to_chi('Hobby'))
-    print(classify('Hobby').upos)
+    deu = 'Nehmen'
+    print(translate_to_chi(deu))
+    print(classify(deu).upos)
+    print(classify(deu).lemma)

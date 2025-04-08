@@ -3,7 +3,7 @@ import warnings
 
 from Methode import classify, count_dict_add, get_sorted_abs_part_subdir, Constants, count_dict_add_dict, \
     extract_word_dict_from_docx, MdFormat, get_noun_gender, my_print1, my_print2, my_print3, UsedDict, \
-    translate_to_chi
+    translate_to_chi, translate_to_chi1
 
 warnings.filterwarnings("ignore")  # 忽略所有警告
 
@@ -127,7 +127,7 @@ class Part:
         for root, dirs, files in os.walk(self.abs_path):
             for file in files:
                 if (file.lower().endswith('.md') and not file.endswith(Constants.New_) and not file.endswith(
-                        Constants.Old_)) or file.lower().endswith('.pdf') or file.lower().endswith('.txt'):
+                        Constants.Old_)) or file.lower().endswith('.pdf') or file.lower().endswith('.txt') or file.lower().endswith('.docx'):
                     file_path = os.path.join(root, file)
                     current_file_count_dict = extract_word_dict_from_docx(file_path)
                     my_print3(f'   --*reading_{len(current_file_count_dict)}_words_in_{file}', 1)
@@ -165,7 +165,7 @@ class Part:
                 self.used_dict['upos'][key] = info.upos
 
             elif group == 'translate':
-                self.used_dict[group][key] = translate_to_chi(key)
+                self.used_dict[group][key] = translate_to_chi1(key)
             else:
                 self.used_dict[group][key] = get_noun_gender(key)
             return self.used_dict[group][key]
