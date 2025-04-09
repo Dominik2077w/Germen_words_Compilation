@@ -18,7 +18,7 @@ APP_ID = ''
 SECRET_KEY = ''
 
 
-def translate_to_chi(text):
+def translate_to_chi_baidu(text):
     """
     使用百度翻译API将德语文本翻译成中文
 
@@ -70,7 +70,10 @@ def translate_to_chi(text):
     except Exception as e:
         print(f"请求翻译API时出错: {str(e)}")
         return ""
-
+def translate_to_chi(text):
+    if APP_ID=='' or SECRET_KEY=='':
+        return translate_to_chi_local(text)
+    return translate_to_chi_baidu(text)
 
 from transformers import MarianMTModel, MarianTokenizer
 
@@ -79,7 +82,7 @@ tokenizer = MarianTokenizer.from_pretrained(model_name)
 model = MarianMTModel.from_pretrained(model_name)
 
 
-def translate_to_chi1(text):
+def translate_to_chi_local(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
 
     outputs = model.generate(
