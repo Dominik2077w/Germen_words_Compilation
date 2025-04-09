@@ -8,20 +8,22 @@
 git clone https://github.com/Dominik2077w/Germen_words_Compilation.git
 ```
 - 或者直接下载zip包,解压缩到本地.: 点击< > Code按钮，选择Download ZIP
-## 2.安装依赖
+## 2.用IDE打开项目文件。（比如说使用PyCharm，学生免费）
+## 3.设置解释器使用Python 3.12, Python 3.13有兼容问题
+## 4.安装依赖
 - 使用pip安装依赖库
 ```
 pip install -r requirements.txt
 ```
-## 3.解释器使用Python 3.12, Python 3.13有兼容问题
-## 4.填写百度翻译API密钥
+
+## 5.填写百度翻译API密钥
 - 在Methode.py中，填入你的百度翻译的API密钥和ID。如果没有的话，可以去百度翻译申请一个免费的API密钥和ID
-## 5.构建文件夹结构
+## 6.构建文件夹结构
 - 使用者应该按照如图结构在python项目目录下构建自己的三层文件夹结构，并将资料文件放入对应文件
 - ![img.png](Cashes/img.png)
 - 结构实例
 - ![img.png](Cashes/img3.png)
-## 6.启动程序-启动方式
+## 7.启动程序-启动方式
 - 1 . 通过Project类的__init__方法，传入一个本项目的通向Project层目录的相对路径(比如说Data)，创建一个Project对象，对全局重新计算以及覆盖保存
 ```
 from Object import Project
@@ -36,7 +38,7 @@ from Object import Folder
 if __name__ == '__main__':
     Folder('Data/MARK').__run__("20231001")
 ```
-## 7.结果
+## 8.结果
 - 1 . 计算完成后，对应目录下会生成neue文件与alte文件
 - ![img2.png](Cashes/img2.png)
 - 计算得到的neue.md文件中，(记录了当前part文件夹中存在的，并且在更早的part文件夹中没有存在过的)词汇。并汇总成了序列。
