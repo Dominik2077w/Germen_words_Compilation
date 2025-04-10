@@ -38,7 +38,7 @@ from Object import Folder
 
 if __name__ == '__main__':
     Folder('Data/MARK').__run__("20231001")
-    # or Folder('Data/MARK').__run__("20231001")
+    # or Folder('Data/MARK').__run__()
 ```
 ## 8.结果
 - 1 . 计算完成后，对应目录下会生成neue文件与alte文件
