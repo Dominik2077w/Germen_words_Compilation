@@ -32,12 +32,13 @@ from Object import Project
 if __name__ == "__main__":
     Project('Data').__run__()
 ```
-- 2 . 通过Folder类的__init__方法，传入一个本项目的通向Folder层目录相对路径(比如说Data/MARK)，创建一个Folder对象，并传入一个字符串参数(比如说20231001)，对这个文件夹下的所有在输入字符串参数日期之后的Part目录进行重新计算和覆盖保存。
+- 2 . 通过Folder类的__init__方法，传入一个本项目的通向Folder层目录相对路径(比如说Data/MARK)，创建一个Folder对象，并传入一个字符串参数(比如说20231001。或者也可以不传入，变量有默认值，将会将整个Folder对象重新计算)，对这个文件夹下的所有在输入字符串参数日期之后的Part目录进行重新计算和覆盖保存。
 ```
 from Object import Folder
 
 if __name__ == '__main__':
     Folder('Data/MARK').__run__("20231001")
+    # or Folder('Data/MARK').__run__("20231001")
 ```
 ## 8.结果
 - 1 . 计算完成后，对应目录下会生成neue文件与alte文件
