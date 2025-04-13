@@ -170,3 +170,5 @@ class Part:
             else:
                 self.used_dict[group][key] = get_noun_gender(key)
             return self.used_dict[group][key]
+if __name__ == '__main__':
+    Project("Data").__run__()

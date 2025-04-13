@@ -5,7 +5,7 @@ import warnings
 import pdfplumber
 import stanza
 
-stanza.download('de', package='de_hdt_large')
+stanza.download('de')
 nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma')
 
 import requests
@@ -13,11 +13,68 @@ import random
 import hashlib
 import json
 
+class Constants:
+    New_ = 'Neue.md'
+    Old_ = 'Alte.md'
+    type1 = ' ' * 5
+    type2 = ' ' * 10
+    type3 = ' ' * 15
+    UsedDictPath = 'used_dict.json'
+    APP_ID_BAIDU = ''
+    SECRET_KEY_BAIDU = ''
+    AUTH_KEY_DEEPL = ''
+
 # 全局变量 - 替换为你自己的百度翻译API凭证
-APP_ID = ''
-SECRET_KEY = ''
 
 
+import requests
+import json
+
+
+def translate_to_chi_deepl(text):
+    """
+    使用DeepL API将德语文本翻译成中文
+
+    参数:
+        text (str): 要翻译的德语文本
+        auth_key (str): DeepL API认证密钥
+
+    返回:
+        str: 翻译后的中文文本
+        str: 如果翻译失败返回空字符串
+    """
+    # DeepL API的URL (免费版和付费版端点不同)
+    url = 'https://api-free.deepl.com/v2/translate'  # 免费版
+    # url = 'https://api.deepl.com/v2/translate'  # 付费版
+
+    # 源语言为德语(DE)，目标语言为中文(ZH)
+    params = {
+        'auth_key': Constants.AUTH_KEY_DEEPL,
+        'text': text,
+        'source_lang': 'DE',
+        'target_lang': 'ZH'
+    }
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+
+    try:
+        # 发送POST请求
+        response = requests.post(url, data=params, headers=headers)
+        result = json.loads(response.text)
+
+        # 解析结果
+        if 'translations' in result and len(result['translations']) > 0:
+            translated = result['translations'][0]['text']
+            return translated if translated else ""
+        else:
+            print(f"翻译失败: {result.get('message', '未知错误')}")
+            return ""
+
+    except Exception as e:
+        print(f"请求DeepL API时出错: {str(e)}")
+        return ""
 def translate_to_chi_baidu(text):
     """
     使用百度翻译API将德语文本翻译成中文
@@ -40,7 +97,7 @@ def translate_to_chi_baidu(text):
     salt = random.randint(32768, 65536)
 
     # 计算签名
-    sign_str = APP_ID + text + str(salt) + SECRET_KEY
+    sign_str = Constants.APP_ID_BAIDU + text + str(salt) + Constants.SECRET_KEY_BAIDU
     sign = hashlib.md5(sign_str.encode()).hexdigest()
 
     # 构造请求参数
@@ -48,7 +105,7 @@ def translate_to_chi_baidu(text):
         'q': text,
         'from': from_lang,
         'to': to_lang,
-        'appid': APP_ID,
+        'appid': Constants.APP_ID_BAIDU,
         'salt': salt,
         'sign': sign
     }
@@ -71,9 +128,12 @@ def translate_to_chi_baidu(text):
         print(f"请求翻译API时出错: {str(e)}")
         return ""
 def translate_to_chi(text):
-    if APP_ID=='' or SECRET_KEY=='':
+    if Constants.AUTH_KEY_DEEPL:
+        return translate_to_chi_deepl(text)
+    elif Constants.APP_ID_BAIDU and Constants.SECRET_KEY_BAIDU:
+        return translate_to_chi_baidu(text)
+    else:
         return translate_to_chi_local(text)
-    return translate_to_chi_baidu(text)
 
 from transformers import MarianMTModel, MarianTokenizer
 
@@ -167,14 +227,6 @@ def extract_word_dict_from_docx(file_path):
             txt = file.read()
     return process_words(txt, german_characters)
 
-
-class Constants:
-    New_ = 'Neue.md'
-    Old_ = 'Alte.md'
-    type1 = ' ' * 5
-    type2 = ' ' * 10
-    type3 = ' ' * 15
-    UsedDictPath = 'used_dict.json'
 
 
 def my_print1(txt, enter=0):
