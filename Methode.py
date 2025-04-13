@@ -204,13 +204,16 @@ def extract_words_from_pdf(pdf_path):
     logging.getLogger('pdfminer').setLevel(logging.ERROR)
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', category=UserWarning)
-        words = ""
+        text = ""
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                text = page.extract_text(split_at_punctuation=True,x_tolerance=0.5)
-                words += ' '
-                words += text
-    return words
+                words = page.extract_words(
+                    x_tolerance=1,  # 调整单词间距
+                    y_tolerance=3,
+                    keep_blank_chars=False,  # 是否保留空白字符
+                )
+            text += " ".join(word["text"] for word in words)
+    return text
 
 
 def process_words(txt, german_characters):
