@@ -61,10 +61,6 @@ def translate_to_chi_deepl(text):
     try:
         response = requests.post(url, data=params, headers=headers)
 
-        # 调试信息 - 打印原始响应
-        print(f"API响应状态码: {response.status_code}")
-        print(f"API响应内容: {response.text}")
-
         # 检查响应是否为空
         if not response.text:
             print("错误: API返回空响应")
@@ -146,13 +142,10 @@ def translate_to_chi_baidu(text):
 
 def translate_to_chi(text):
     if Constants.AUTH_KEY_DEEPL!= '':
-        print("使用DeepL翻译")
         return translate_to_chi_deepl(text)
     elif Constants.APP_ID_BAIDU!= '' and Constants.SECRET_KEY_BAIDU!= '':
-        print("使用百度翻译")
         return translate_to_chi_baidu(text)
     else:
-        print("使用本地模型翻译")
         return translate_to_chi_local(text)
 
 
