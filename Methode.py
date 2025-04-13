@@ -205,7 +205,7 @@ def extract_words_from_pdf(pdf_path):
                     y_tolerance=3,
                     keep_blank_chars=False,  # 是否保留空白字符
                 )
-            text += " ".join(word["text"] for word in words)
+                text += " ".join(word["text"] for word in words)
     return text
 
 
