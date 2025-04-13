@@ -8,10 +8,9 @@ import stanza
 stanza.download('de')
 nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma')
 
-import requests
 import random
 import hashlib
-import json
+
 
 class Constants:
     New_ = 'Neue.md'
@@ -23,6 +22,7 @@ class Constants:
     APP_ID_BAIDU = ''
     SECRET_KEY_BAIDU = ''
     AUTH_KEY_DEEPL = ''
+
 
 # 全局变量 - 替换为你自己的百度翻译API凭证
 
@@ -43,11 +43,10 @@ def translate_to_chi_deepl(text):
         str: 翻译后的中文文本
         str: 如果翻译失败返回空字符串
     """
-    # DeepL API的URL (免费版和付费版端点不同)
+    # DeepL API的URL
     url = 'https://api-free.deepl.com/v2/translate'  # 免费版
     # url = 'https://api.deepl.com/v2/translate'  # 付费版
 
-    # 源语言为德语(DE)，目标语言为中文(ZH)
     params = {
         'auth_key': Constants.AUTH_KEY_DEEPL,
         'text': text,
@@ -60,21 +59,37 @@ def translate_to_chi_deepl(text):
     }
 
     try:
-        # 发送POST请求
         response = requests.post(url, data=params, headers=headers)
+
+        # 调试信息 - 打印原始响应
+        print(f"API响应状态码: {response.status_code}")
+        print(f"API响应内容: {response.text}")
+
+        # 检查响应是否为空
+        if not response.text:
+            print("错误: API返回空响应")
+            return ""
+
         result = json.loads(response.text)
 
-        # 解析结果
         if 'translations' in result and len(result['translations']) > 0:
             translated = result['translations'][0]['text']
             return translated if translated else ""
-        else:
-            print(f"翻译失败: {result.get('message', '未知错误')}")
+
+        # 检查是否有错误信息
+        if 'message' in result:
+            print(f"翻译失败: {result['message']}")
             return ""
 
-    except Exception as e:
-        print(f"请求DeepL API时出错: {str(e)}")
+        print("未知响应格式")
         return ""
+
+    except json.JSONDecodeError as e:
+        print(f"JSON解析错误: {str(e)}")
+        print(f"原始响应: {response.text}")
+        return ""
+
+
 def translate_to_chi_baidu(text):
     """
     使用百度翻译API将德语文本翻译成中文
@@ -127,13 +142,19 @@ def translate_to_chi_baidu(text):
     except Exception as e:
         print(f"请求翻译API时出错: {str(e)}")
         return ""
+
+
 def translate_to_chi(text):
-    if Constants.AUTH_KEY_DEEPL:
+    if Constants.AUTH_KEY_DEEPL!= '':
+        print("使用DeepL翻译")
         return translate_to_chi_deepl(text)
-    elif Constants.APP_ID_BAIDU and Constants.SECRET_KEY_BAIDU:
+    elif Constants.APP_ID_BAIDU!= '' and Constants.SECRET_KEY_BAIDU!= '':
+        print("使用百度翻译")
         return translate_to_chi_baidu(text)
     else:
+        print("使用本地模型翻译")
         return translate_to_chi_local(text)
+
 
 from transformers import MarianMTModel, MarianTokenizer
 
@@ -226,7 +247,6 @@ def extract_word_dict_from_docx(file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             txt = file.read()
     return process_words(txt, german_characters)
-
 
 
 def my_print1(txt, enter=0):
