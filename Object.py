@@ -35,7 +35,7 @@ class Folder:
         self.folder_appeared_set = set()
 
     def __run__(self, cutoff_date='        ALL'):
-        # EmailAddress: Dominik_For_Heybox@163.com
+        # EmailAddress: Dominik_For_Heybox@163.com  有什么问题和需求可以联系
         # 前五个给这个邮箱发送邮件的学弟学妹有机会获得，请学长吃饭的机会:D  [doge]
         my_print1(f'{self.rel_path} from {cutoff_date} to now', 1)
         sorted_abs_part_subdir = get_sorted_abs_part_subdir(self.abs_path)
