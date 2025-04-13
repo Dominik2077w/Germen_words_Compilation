@@ -207,7 +207,7 @@ def extract_words_from_pdf(pdf_path):
         words = ""
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                text = page.extract_text()
+                text = page.extract_text(split_at_punctuation=True,x_tolerance=0.5)
                 words += ' '
                 words += text
     return words
