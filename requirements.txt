@@ -33,3 +33,7 @@ tqdm==4.67.1
 transformers==4.51.3
 typing_extensions==4.13.2
 urllib3==2.4.0
+click==8.1.8
+joblib==1.4.2
+sacremoses==0.1.1
+
