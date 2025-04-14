@@ -195,32 +195,29 @@ class MdFormat:
 def extract_words_from_pdf(pdf_path):
     import logging
     logging.getLogger('pdfminer').setLevel(logging.ERROR)
+    text = ""
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', category=UserWarning)
-        text = ""
+
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                words = page.extract_words(
-                    x_tolerance=1,  # 调整单词间距
-                    y_tolerance=3,
-                    keep_blank_chars=False,  # 是否保留空白字符
-                )
-                text += " ".join(word["text"] for word in words)
+                text += page.extract_text(x_tolerance=1)
     return text
 
 
 def process_words(txt, german_characters):
     word_count_dict = {}
-    relib = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", '\n', '\r', '\t', ':', ',', '.', '„', '“', '!', '#', '@',
-             '~', '`', '\'', '&', '%', '^', '(', ')', '{', '}', '[', ']', '+', '=']
-    for i in relib:
-        txt = txt.replace(i, ' ')
+    txt=txt.replace("-\n","")
+    txt=txt.replace(". "," ")
+    txt=txt.replace(".\n"," ")
+    # Replace any character not in german_characters with a space
+    processed_txt = ''.join([char if char in german_characters else ' ' for char in txt])
+    #print(processed_txt)
+    # Split into words (split on whitespace)
+    words = processed_txt.split(" ")
 
-    words = txt.split(' ')
     for word in words:
         if word == "":
-            continue
-        if not re.match(f"^[{german_characters}]+$", word):
             continue
         if word in word_count_dict:
             word_count_dict[word] += 1
@@ -236,7 +233,7 @@ def extract_word_dict_from_docx(file_path):
     :param file_path: markdown文件或pdf的路径
     :return: 记录单词出现次数的字典
     """
-    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
+    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_."
     if file_path.endswith(".pdf"):
         txt = extract_words_from_pdf(file_path)
     else:
