@@ -88,6 +88,7 @@ Folder('Data/MARK').__run__()
 - 中文翻译仅供参考
 
 - 已处理词汇保存在used_dict.json中,可供后续使用,不会一直调用API
+- used_dict.json中已有的数据均为DeepL翻译
 - 提取出一些奇怪的单词的话，可能是因为有些pdf排版是纵向的
 
 ## 灵感池 💡
