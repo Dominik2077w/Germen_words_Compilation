@@ -3,24 +3,25 @@ import warnings
 
 from Methode import classify, count_dict_add, get_sorted_abs_part_subdir, Constants, count_dict_add_dict, \
     extract_word_dict_from_docx, MdFormat, get_noun_gender, my_print1, my_print2, my_print3, UsedDict, \
-    translate_to_chi
+    translate_to_chi, get_base_dir
 
 warnings.filterwarnings("ignore")  # 忽略所有警告
+#pyinstaller --onefile --collect-all emoji --collect-all stanza Object.py
 
 
 class Project:
     def __init__(self, project_name):
         self.project_name = project_name
-        self.target_dir = os.path.join(os.getcwd(), project_name)
+        self.target_dir = os.path.join(get_base_dir(), project_name)
 
     def __run__(self):
-        base_dir = os.path.join(os.getcwd(), self.target_dir)
+        base_dir = os.path.join(get_base_dir(), self.target_dir)
         print("全目录覆盖处理:", self.target_dir)
         try:
             for entry in os.listdir(base_dir):
                 full_path = os.path.join(base_dir, entry)
                 if os.path.isdir(full_path):
-                    rel_path = os.path.relpath(full_path, os.getcwd())
+                    rel_path = os.path.relpath(full_path,get_base_dir())
                     print(rel_path)
                     Folder(rel_path).__run__()
         except FileNotFoundError:
@@ -31,7 +32,7 @@ class Project:
 class Folder:
     def __init__(self, rel_path):
         self.rel_path = rel_path
-        self.abs_path = os.path.join(os.getcwd(), rel_path)
+        self.abs_path = os.path.join(get_base_dir(), rel_path)
         self.folder_appeared_set = set()
 
     def __run__(self, cutoff_date='        ALL'):

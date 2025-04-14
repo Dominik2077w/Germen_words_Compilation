@@ -1,11 +1,20 @@
 import os
 import re
+import sys
 import time
 import warnings
 from pathlib import Path
 
 import pdfplumber
 import stanza
+def get_base_dir():
+    """获取可执行文件所在目录"""
+    if getattr(sys, 'frozen', False):
+        # 打包后：sys.executable 是可执行文件路径
+        return Path(os.path.dirname(sys.executable))
+    else:
+        # 开发时：返回当前脚本目录
+        return Path(os.path.dirname(os.path.abspath(__file__)))
 
 class Constants:
     New_ = 'Neue.md'
@@ -13,7 +22,7 @@ class Constants:
     type1 = ' ' * 5
     type2 = ' ' * 10
     type3 = ' ' * 15
-    BASE_DIR= Path(__file__).parent
+    BASE_DIR= get_base_dir()
     CACHE_DIR= BASE_DIR / 'Cashes'
 
     # File paths
@@ -21,8 +30,11 @@ class Constants:
     APP_ID_BAIDU = ''
     SECRET_KEY_BAIDU = ''
     AUTH_KEY_DEEPL = ''
-stanza.download('de',model_dir=Constants.CACHE_DIR)
-nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma',dir=Constants.CACHE_DIR)
+
+Constants.CACHE_DIR.mkdir(exist_ok=True)  # 确保目录存在
+
+stanza.download('de',model_dir=str(Constants.CACHE_DIR))
+nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma',dir=str(Constants.CACHE_DIR))
 
 import random
 import hashlib
@@ -337,7 +349,7 @@ def classify(deu):
 
 class UsedDict:
     def __init__(self):
-        self.path = os.path.join(os.getcwd(), Constants.USED_DICT_PATH)
+        self.path = os.path.join(Constants.BASE_DIR, Constants.USED_DICT_PATH)
 
     def load(self):
         with open(self.path, 'r', encoding='utf-8') as file:
