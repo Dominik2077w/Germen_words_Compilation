@@ -2,6 +2,7 @@ import os
 import re
 import time
 import warnings
+from pathlib import Path
 
 import pdfplumber
 import stanza
@@ -12,13 +13,16 @@ class Constants:
     type1 = ' ' * 5
     type2 = ' ' * 10
     type3 = ' ' * 15
-    UsedDictPath = './Cashes/used_dict.json'
-    StanzaPath = './Cashes'
+    BASE_DIR= Path(__file__).parent
+    CACHE_DIR= BASE_DIR / 'Cashes'
+
+    # File paths
+    USED_DICT_PATH= CACHE_DIR / 'used_dict.json'
     APP_ID_BAIDU = ''
     SECRET_KEY_BAIDU = ''
     AUTH_KEY_DEEPL = ''
-stanza.download('de',model_dir=Constants.StanzaPath)
-nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma',dir=Constants.StanzaPath)
+stanza.download('de',model_dir=Constants.CACHE_DIR)
+nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma',dir=Constants.CACHE_DIR)
 
 import random
 import hashlib
@@ -333,7 +337,7 @@ def classify(deu):
 
 class UsedDict:
     def __init__(self):
-        self.path = os.path.join(os.getcwd(), Constants.UsedDictPath)
+        self.path = os.path.join(os.getcwd(), Constants.USED_DICT_PATH)
 
     def load(self):
         with open(self.path, 'r', encoding='utf-8') as file:
