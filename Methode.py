@@ -1,5 +1,6 @@
 import os
 import re
+import time
 import warnings
 
 import pdfplumber
@@ -32,17 +33,7 @@ import json
 
 
 def translate_to_chi_deepl(text):
-    """
-    使用DeepL API将德语文本翻译成中文
-
-    参数:
-        text (str): 要翻译的德语文本
-        auth_key (str): DeepL API认证密钥
-
-    返回:
-        str: 翻译后的中文文本
-        str: 如果翻译失败返回空字符串
-    """
+    time.sleep(0.1)
     # DeepL API的URL
     url = 'https://api-free.deepl.com/v2/translate'  # 免费版
     # url = 'https://api.deepl.com/v2/translate'  # 付费版
@@ -233,7 +224,7 @@ def extract_word_dict_from_docx(file_path):
     :param file_path: markdown文件或pdf的路径
     :return: 记录单词出现次数的字典
     """
-    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_."
+    german_characters = "äöüßÄÖÜẞabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
     if file_path.endswith(".pdf"):
         txt = extract_words_from_pdf(file_path)
     else:
