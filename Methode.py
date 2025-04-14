@@ -6,23 +6,24 @@ import warnings
 import pdfplumber
 import stanza
 
-stanza.download('de')
-nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma')
-
-import random
-import hashlib
-
-
 class Constants:
     New_ = 'Neue.md'
     Old_ = 'Alte.md'
     type1 = ' ' * 5
     type2 = ' ' * 10
     type3 = ' ' * 15
-    UsedDictPath = 'used_dict.json'
+    UsedDictPath = './Cashes/used_dict.json'
+    StanzaPath = './Cashes'
     APP_ID_BAIDU = ''
     SECRET_KEY_BAIDU = ''
     AUTH_KEY_DEEPL = ''
+stanza.download('de',model_dir=Constants.StanzaPath)
+nlp = stanza.Pipeline('de', processors='tokenize,mwt,pos,lemma',dir=Constants.StanzaPath)
+
+import random
+import hashlib
+
+
 
 
 # 全局变量 - 替换为你自己的百度翻译API凭证
