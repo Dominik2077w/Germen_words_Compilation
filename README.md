@@ -83,7 +83,8 @@
 
 文档组结构实例：
 
-![img.png](img.png)
+![img_3.png](Cache/img_3.png)
+
 单词汇总md文件生成实例:
 
 ![img_1.png](Cache/img_1.png)
