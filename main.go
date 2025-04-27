@@ -26,7 +26,7 @@ var (
 	BasePath, _ = os.Getwd()
 	// 初始化 rate.Limiter：5 QPS，最大突发 15
 	limiter           = rate.NewLimiter(rate.Every(300*time.Millisecond), 300)
-	DeepseekApiKey    = "sk-7ad5506da36d4dd5b88d7c3d2ea010ca"
+	DeepseekApiKey    = "在这里填入你的API密钥"
 	promptForClassify = `请严格按以下规则处理德语文本：
 1. 提取所有名词，动词，形容词副词，专有名词，并还原为原型（动词不定式/名词单数主格/形容词原级）
 2. 名词保持首字母大写，复合词不拆解（如"Schulbuch"不拆）
