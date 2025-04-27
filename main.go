@@ -25,8 +25,9 @@ var (
 	once        sync.Once
 	BasePath, _ = os.Getwd()
 	// 初始化 rate.Limiter：5 QPS，最大突发 15
-	limiter           = rate.NewLimiter(rate.Every(300*time.Millisecond), 300)
-	DeepseekApiKey    = "在这里填入你的API密钥"
+	limiterForSync    = rate.NewLimiter(rate.Every(1*time.Millisecond), 1)
+	limiterForAPI     = rate.NewLimiter(rate.Every(200*time.Millisecond), 1)
+	DeepseekApiKey    = "填写你的API密钥"
 	promptForClassify = `请严格按以下规则处理德语文本：
 1. 提取所有名词，动词，形容词副词，专有名词，并还原为原型（动词不定式/名词单数主格/形容词原级）
 2. 名词保持首字母大写，复合词不拆解（如"Schulbuch"不拆）
@@ -159,7 +160,7 @@ func (c *Cache) Save() error {
 	}
 
 	// 将数据编码为JSON
-	data, err := json.Marshal(c.data)
+	data, err := json.MarshalIndent(c.data, "", "    ")
 	if err != nil {
 		return fmt.Errorf("序列化缓存数据失败: %v", err)
 	}
@@ -643,7 +644,7 @@ func askDeepSeek(prompt string, text string) string {
 		fmt.Println(GetFormattedTimestamp(), "命中缓存: ", GetRequestType(prompt), " ", strings.Replace(text, "\n", " ", -1))
 		return value
 	} // 等待令牌
-	if err := limiter.Wait(context.Background()); err != nil {
+	if err := limiterForAPI.Wait(context.Background()); err != nil {
 		log.Printf("限流等待失败: %v", err)
 	}
 	apiKey := DeepseekApiKey
@@ -653,7 +654,7 @@ func askDeepSeek(prompt string, text string) string {
 
 	// 构造请求体
 	requestData := RequestData{
-		Model: "deepseek-chat",
+		Model: "deepseek-reasoner",
 		Messages: []struct {
 			Role    string `json:"role"`
 			Content string `json:"content"`
@@ -715,11 +716,12 @@ func askDeepSeek(prompt string, text string) string {
 			}
 		}
 		time.Sleep(time.Duration(retryAfter) * time.Second)
-		return "" //askDeepSeek(prompt, text) // 递归重试
+		return askDeepSeek(prompt, text) // 递归重试
 	}
 
 	body, _ := io.ReadAll(resp.Body)
-	return fmt.Sprintf("Error: %d - %s", resp.StatusCode, string(body))
+	log.Fatalf("请求失败: %s, %s", resp.Status, string(body))
+	return fmt.Sprintf("Error: %s - %s", resp.Status, string(body))
 }
 
 // 计算两个集合的交集
@@ -762,7 +764,7 @@ func ProcessArray[T any, R any](input []T, processFunc func(T) R) []R {
 	for i, val := range input {
 		wg.Add(1)
 		// 等待令牌
-		if err := limiter.Wait(context.Background()); err != nil {
+		if err := limiterForSync.Wait(context.Background()); err != nil {
 			log.Printf("限流等待失败: %v", err)
 		}
 		go func(index int, value T) {
@@ -776,6 +778,9 @@ func ProcessArray[T any, R any](input []T, processFunc func(T) R) []R {
 }
 
 func main() {
-	NewProject("Project").Run()
+	NewProject("Data").Run()
+	//initCache()
+	//GlobalCache.Save()
 	//fmt.Println(askDeepSeek("", "Hallo, wie geht es dir?"))
+
 }
