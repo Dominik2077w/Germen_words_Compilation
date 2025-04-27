@@ -81,6 +81,9 @@
 
 联系邮箱：`< Dominik_For_Heybox@163.com >`
 
+文档组结构实例：
+
+![img.png](img.png)
 单词汇总md文件生成实例:
 
 ![img_1.png](Cache/img_1.png)
