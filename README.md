@@ -95,22 +95,15 @@ Project/                           # 顶层项目目录
 │   │       ├── file2.md           # file2的笔记结果
 │   │       ├── new.md             # 新增词汇的Markdown文件
 │   │       └── old.md             # 已有词汇的Markdown文件
-│   ├── Part2/
-│   │   ├── file3.pdf              # PDF文件
-│   │   ├── file4.txt              # 文本文件
-│   │   └── result/
-│   └── result/                    # Folder级别的结果
-│       ├── new.md                 # 新增词汇的Markdown文件
-│       └── old.md                 # 已有词汇的Markdown文件
+│   └── Part2/
+│       ├── file3.pdf              # PDF文件
+│       ├── file4.txt              # 文本文件
+│       └── result/
+│    
 │
 ├── Folder2/
-│   ├── Part1/
-│   ├── Part2/
-│   └── result/
-│       ├── new.md
-│       └── old.md
+│   
 │
-└── targetDir/                     # 可能包含多个Folder子文件夹
 ```
 
 ***单词汇总md文件生成实例***:
