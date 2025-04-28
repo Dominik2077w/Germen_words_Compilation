@@ -26,8 +26,8 @@ var (
 	BasePath, _ = os.Getwd()
 	// 初始化 rate.Limiter：5 QPS，最大突发 15
 	limiterForSync    = rate.NewLimiter(rate.Every(1*time.Millisecond), 1)
-	limiterForAPI     = rate.NewLimiter(rate.Every(200*time.Millisecond), 1)
-	DeepseekApiKey    = "填写你的API密钥"
+	limiterForAPI     = rate.NewLimiter(rate.Every(100*time.Millisecond), 1)
+	DeepseekApiKey    = "在此填入你的API Key"
 	promptForClassify = `请严格按以下规则处理德语文本：
 1. 提取所有名词，动词，形容词副词，专有名词，并还原为原型（动词不定式/名词单数主格/形容词原级）
 2. 名词保持首字母大写，复合词不拆解（如"Schulbuch"不拆）
@@ -168,6 +168,8 @@ func (c *Cache) Save() error {
 	// 写入文件
 	if err := os.WriteFile(c.path, data, 0644); err != nil {
 		return fmt.Errorf("写入缓存文件失败: %v", err)
+	} else {
+		fmt.Println(GetFormattedTimestamp(), "缓存文件已保存到:", c.path)
 	}
 
 	return nil
@@ -268,6 +270,9 @@ func (p *Project) Run() {
 	// 遍历并打印所有子文件夹的绝对路径
 	for _, entry := range entries {
 		if entry.IsDir() {
+			if strings.HasPrefix(entry.Name(), ".") {
+				continue
+			}
 			absPath, err := filepath.Abs(filepath.Join(dirPath, entry.Name()))
 			if err != nil {
 				log.Printf("获取绝对路径失败: %v", err)
@@ -313,6 +318,9 @@ func (f *Folder) Run() {
 	partList := make([]string, 0)
 	for _, entry := range entries {
 		if entry.IsDir() {
+			if strings.HasPrefix(entry.Name(), ".") {
+				continue
+			}
 			absPath, err := filepath.Abs(filepath.Join(f.absolutePath, entry.Name()))
 			if err != nil {
 				log.Printf("获取绝对路径失败: %v", err)
@@ -338,11 +346,16 @@ func (f *Folder) Run() {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		NewMdTextList = ProcessArray(diffNewSetList, askDeepSeekFormat)
+		NewMdTextList = ProcessArray(diffNewSetList, func(set map[string]bool) string {
+			return askDeepSeekFormat(set, f.absolutePath)
+		})
+
 	}()
 	go func() {
 		defer wg.Done()
-		OldMdTextList = ProcessArray(diffOldSetList, askDeepSeekFormat)
+		OldMdTextList = ProcessArray(diffOldSetList, func(set map[string]bool) string {
+			return askDeepSeekFormat(set, f.absolutePath)
+		})
 	}()
 	wg.Wait()
 	for i := 0; i < len(partList); i++ {
@@ -383,6 +396,9 @@ func (p *Part) Run() map[string]bool {
 	fileList := make([]string, 0)
 	for _, entry := range entries {
 		if !entry.IsDir() {
+			if strings.HasPrefix(entry.Name(), ".") {
+				continue
+			}
 			absPath, err := filepath.Abs(filepath.Join(p.absolutePath, entry.Name()))
 			if err != nil {
 				log.Printf("获取绝对路径失败: %v", err)
@@ -475,20 +491,20 @@ func (f *File) Run() map[string]bool {
 
 func (f *File) processLinesOrganize(lines []string) []string {
 	return ProcessArray(lines, func(text string) string {
-		return askDeepSeek(promptForOrganize, text)
+		return askDeepSeek(promptForOrganize, text, f.absolutePath)
 	})
 }
 
 func (f *File) processLinesToNotizen(lines []string) string {
 	lst := ProcessArray(lines, func(text string) string {
-		return askDeepSeek(promptForNotizen, text)
+		return askDeepSeek(promptForNotizen, text, f.absolutePath)
 	})
 	return strings.Join(lst, "\n************************\n")
 }
 
 func (f *File) processLinesToClassifyHash(lines []string) map[string]bool {
 	stringList := ProcessArray(lines, func(text string) string {
-		return askDeepSeek(promptForClassify, text)
+		return askDeepSeek(promptForClassify, text, f.absolutePath)
 	})
 	sets := make([]map[string]bool, 0)
 	for _, str := range stringList {
@@ -604,7 +620,7 @@ type ResponseData struct {
 	} `json:"choices"`
 }
 
-func askDeepSeekFormat(set map[string]bool) string {
+func askDeepSeekFormat(set map[string]bool, status string) string {
 	texts := make([]string, 0)
 	for text, _ := range set {
 		texts = append(texts, text)
@@ -618,7 +634,7 @@ func askDeepSeekFormat(set map[string]bool) string {
 	}
 	ans = append(ans, strings.Join(texts, "\n"))
 	mdPiece := ProcessArray(ans, func(text string) string {
-		return askDeepSeek(promptForFormat, text)
+		return askDeepSeek(promptForFormat, text, status)
 	})
 	finalTexts := make([]string, 0)
 	for _, text := range mdPiece {
@@ -634,94 +650,105 @@ type RequestData struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
 	} `json:"messages"`
+	Stream bool `json:"stream"`
 }
 
-func askDeepSeek(prompt string, text string) string {
-	// 替换成你的实际 API 密钥
+func askDeepSeek(prompt string, text string, status string) string {
 	content := prompt + text
+	step := ""
+
 	value, exists := GlobalCache.Get(content)
 	if exists {
-		fmt.Println(GetFormattedTimestamp(), "命中缓存: ", GetRequestType(prompt), " ", strings.Replace(text, "\n", " ", -1))
 		return value
-	} // 等待令牌
+	}
+
+	// 等待令牌
 	if err := limiterForAPI.Wait(context.Background()); err != nil {
-		log.Printf("限流等待失败: %v", err)
-	}
-	apiKey := DeepseekApiKey
-	fmt.Println(GetFormattedTimestamp(), "新网络请求: ", GetRequestType(prompt), " ", strings.Replace(text, "\n", " ", -1))
-	// API 端点
-	url := "https://api.deepseek.com/v1/chat/completions"
+		step = "等待令牌失败"
+	} else {
+		apiKey := DeepseekApiKey
+		fmt.Println(GetFormattedTimestamp(), "新网络请求: ", GetRequestType(prompt), " ", status, strings.Replace(text, "\n", " ", -1))
 
-	// 构造请求体
-	requestData := RequestData{
-		Model: "deepseek-reasoner",
-		Messages: []struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		}{
-			{Role: "user", Content: content},
-		},
-	}
+		url := "https://api.deepseek.com/v1/chat/completions"
 
-	requestBody, err := json.Marshal(requestData)
-	if err != nil {
-		return fmt.Sprintf("请求体序列化失败: %v", err)
-	}
-
-	// 创建 HTTP 请求
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return fmt.Sprintf("创建请求失败: %v", err)
-	}
-
-	// 设置请求头
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-
-	// 发送请求
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Sprintf("发送请求失败: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// 处理响应
-	if resp.StatusCode == http.StatusOK {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Sprintf("读取响应失败: %v", err)
+		requestData := RequestData{
+			Model: "deepseek-chat",
+			Messages: []struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			}{
+				{Role: "user", Content: content},
+			},
+			Stream: false,
 		}
 
-		var responseData ResponseData
-		err = json.Unmarshal(body, &responseData)
-		if err != nil {
-			return fmt.Sprintf("解析响应失败: %v", err)
-		}
+		if requestBody, err := json.Marshal(requestData); err != nil {
+			step = "请求体编码失败"
+		} else if req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody)); err != nil {
+			step = "创建HTTP请求失败"
+		} else {
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Authorization", "Bearer "+apiKey)
 
-		if len(responseData.Choices) > 0 {
-			ans := responseData.Choices[0].Message.Content
-			GlobalCache.Set(content, ans)
-			_ = GlobalCache.SavePer()
-			return ans
-		}
-		return "未找到响应内容"
-	}
-	if resp.StatusCode == http.StatusTooManyRequests { // 429
-		fmt.Println("请求过于频繁，等待重试...")
-		retryAfter := 60 // 默认等待60秒
-		if ra := resp.Header.Get("Retry-After"); ra != "" {
-			if sec, err := strconv.Atoi(ra); err == nil {
-				retryAfter = sec
+			client := &http.Client{Timeout: 0}
+			if resp, err := client.Do(req); err != nil {
+				step = "发送HTTP请求失败"
+			} else {
+				defer func(Body io.ReadCloser) {
+					if cerr := Body.Close(); cerr != nil {
+						log.Println(GetFormattedTimestamp(), "关闭响应体失败", cerr, status, strings.Replace(text, "\n", " ", -1))
+					}
+				}(resp.Body)
+
+				if resp.StatusCode == http.StatusOK {
+					if body, err := io.ReadAll(resp.Body); err != nil {
+						step = fmt.Sprintf("读取响应体失败: %v", err)
+					} else {
+						bodyStr := strings.TrimSpace(string(body))
+						if bodyStr == "" || (!strings.HasPrefix(bodyStr, "{") && !strings.HasPrefix(bodyStr, "[")) {
+							step = "无效响应体"
+						} else {
+							var responseData ResponseData
+							if err := json.Unmarshal(body, &responseData); err != nil {
+								step = "解析响应JSON失败"
+							} else if len(responseData.Choices) > 0 {
+								ans := responseData.Choices[0].Message.Content
+								fmt.Println(GetFormattedTimestamp(), "回复接收", GetRequestType(prompt), status, strings.Replace(ans, "\n", " ", -1))
+								GlobalCache.Set(content, ans)
+								_ = GlobalCache.Save()
+								return ans
+							} else {
+								step = "空的响应Choices"
+							}
+						}
+					}
+				} else if resp.StatusCode == http.StatusTooManyRequests {
+					retryAfter := 60
+					if ra := resp.Header.Get("Retry-After"); ra != "" {
+						if sec, err := strconv.Atoi(ra); err == nil {
+							retryAfter = sec
+						}
+					}
+					log.Println(GetFormattedTimestamp(), "请求过于频繁 429", status, strings.Replace(text, "\n", " ", -1))
+					time.Sleep(time.Duration(retryAfter) * time.Second)
+					return askDeepSeek(prompt, text, status)
+				} else {
+					if body, _ := io.ReadAll(resp.Body); len(body) > 0 {
+						log.Println(GetFormattedTimestamp(), fmt.Sprintf("请求失败，状态码: %d, 响应: %s", resp.StatusCode, string(body)), status, strings.Replace(text, "\n", " ", -1))
+					}
+					step = "请求失败，非200/429"
+				}
 			}
 		}
-		time.Sleep(time.Duration(retryAfter) * time.Second)
-		return askDeepSeek(prompt, text) // 递归重试
 	}
 
-	body, _ := io.ReadAll(resp.Body)
-	log.Fatalf("请求失败: %s, %s", resp.Status, string(body))
-	return fmt.Sprintf("Error: %s - %s", resp.Status, string(body))
+	// 错误处理
+	if step != "" {
+		log.Println(GetFormattedTimestamp(), step, status, strings.Replace(text, "\n", " ", -1))
+	}
+
+	// 统一递归重试
+	return askDeepSeek(prompt, text, status)
 }
 
 // 计算两个集合的交集
@@ -778,9 +805,11 @@ func ProcessArray[T any, R any](input []T, processFunc func(T) R) []R {
 }
 
 func main() {
-	NewProject("Data").Run()
+	NewProjectWithPath("/Users/wuchenyu/LRZ Sync+Share/GWC/Data").Run()
+	//NewProject("Data").Run()
+	//NewProject("Da").Run()
 	//initCache()
 	//GlobalCache.Save()
-	//fmt.Println(askDeepSeek("", "Hallo, wie geht es dir?"))
+	//fmt.Println(askDeepSeek(promptForOrganize, "Leistungsstörung Leistungsstörungsrecht Fall 49: Spezialpumpe Unternehmer U hat am 1.3. eine Spezialpumpe für seine Fertigungsstraße bei V verbindlich bestellt. Vereinbarter Liefertermin war der 1.7. Als V nicht fristgemäß liefert, fordert der U den V per anwaltlichen Schreiben vom 2.7. auf, bis 15.7. zu liefern. Daraufhin erfolgt Lieferung am 1.8. a) Wann tritt Fälligkeit der Lieferung ein? b) Ab wann gerät V in Verzug? 206 © Hochschule Kempten – University of Applied Sciences, Prof. Dr. Isabella Brosig-Hoschka, SoSe2025 Fall in Anlehnung an: Führich, Wirtschaftsprivatrecht, 13. Aufl. 2017, S. 204 f."))
 
 }
