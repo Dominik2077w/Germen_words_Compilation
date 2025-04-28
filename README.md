@@ -83,7 +83,7 @@
 
 文档组结构实例：
 
-![img_3.png](Cache/img_3.png)
+![img.png](Cache/img.png)
 
 单词汇总md文件生成实例:
 
@@ -91,7 +91,7 @@
 
 课件笔记生成实例:
 
-![img.png](Cache/img.png)
+![img_3.png](Cache/img_3.png)
 
 课堂老师口语数据笔记生成实例：
 
