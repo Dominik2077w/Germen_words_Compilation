@@ -81,21 +81,119 @@
 
 联系邮箱：`< Dominik_For_Heybox@163.com >`
 
-文档组结构实例：
+***文档组结构实例***：
 
-![img.png](Cache/img.png)
+```
+Project/                           # 顶层项目目录
+│
+├── Folder1/                       # 一级子文件夹（Folder）
+│   ├── Part1/                     # 二级子文件夹（Part）
+│   │   ├── file1.txt              # 文本文件1
+│   │   ├── file2.txt              # 文本文件2
+│   │   └── result/                # 该Part的结果目录
+│   │       ├── file1.md           # file1的笔记结果
+│   │       ├── file2.md           # file2的笔记结果
+│   │       ├── new.md             # 新增词汇的Markdown文件
+│   │       └── old.md             # 已有词汇的Markdown文件
+│   ├── Part2/
+│   │   ├── file3.pdf              # PDF文件
+│   │   ├── file4.txt              # 文本文件
+│   │   └── result/
+│   └── result/                    # Folder级别的结果
+│       ├── new.md                 # 新增词汇的Markdown文件
+│       └── old.md                 # 已有词汇的Markdown文件
+│
+├── Folder2/
+│   ├── Part1/
+│   ├── Part2/
+│   └── result/
+│       ├── new.md
+│       └── old.md
+│
+└── targetDir/                     # 可能包含多个Folder子文件夹
+```
 
-单词汇总md文件生成实例:
+***单词汇总md文件生成实例***:
 
-![img_1.png](Cache/img_1.png)
+- (Adjektive/Adverbien) unternehmensspezifisch - 企业特定的
+- (Adjektive/Adverbien) unternehmensweit - 全企业的
+- (Adjektive/Adverbien) unterschiedlich - 不同的
+- (Adjektive/Adverbien) variantenreich - 多样化的
+- (Adjektive/Adverbien) veraltet - 过时的
+- (Adverbien) Kontinuierlich - 持续地
+- (Eigennamen) Deming - 戴明
+- (Eigennamen) Deutsch - 德语/德国的
+- (Eigennamen) ERA - ERA（缩写）
+- (Eigennamen) Erwin - 埃尔温
+- (Eigennamen) Erwin Kaeser-Lappe - 埃尔温·凯泽-拉佩
 
-课件笔记生成实例:
+***课件笔记生成实例***:
 
-![img_3.png](Cache/img_3.png)
+************************
+[德语原文]  
+01.04.2025  
+Verhaltensgruppen beim Auftreten von Veränderungen  
+Bremser (ca. 40%), Gegner (ca. 15%), Promotoren (ca. 5%), Skeptiker (ca. 40%).  
+Einschätzung sachlicher Risiken  
+Einschätzung persönlicher Risiken  
+Grundsätze zum Umgang mit Widerstand  
+Es gibt keine Veränderung ohne Widerstand. Tritt Widerstand nicht auf, glaubt auch niemand an die Realisierung der Veränderung.  
+Widerstand enthält immer eine verschlüsselte Botschaft. Er ist Ausdruck für verdeckte Energie, die in Befürchtungen, Ängsten oder Bedenken gebunden ist.  
+Nichtbeachtung von Widerstand führt zu Blockadehaltung. Druck erhöht lediglich den Widerstand oder verlagert ihn in den Untergrund, ändert aber die Haltung kaum.  
+Mit dem Widerstand und nicht gegen ihn gehen. Ernst nehmen, Druck wegnehmen, das Gespräch suchen, Ursachen ergründen, ggf. abbauen, gemeinsame Absprachen treffen.
 
-课堂老师口语数据笔记生成实例：
+[中文翻译]  
+2025年4月1日  
+变革中的行为群体分类  
+阻碍者（约40%）、反对者（约15%）、推动者（约5%）、怀疑者（约40%）  
+客观风险评估  
+个人风险评估  
+应对抵抗的基本原则  
+**没有抵抗就没有变革**。若未出现抵抗，说明无人相信变革能真正落地。  
+抵抗总包含隐晦信息。它本质是潜藏能量的外显，这种能量根植于担忧、恐惧或顾虑之中。  
+忽视抵抗将引发对抗姿态。施压只会增强抵抗或使其转入地下，但几乎无法改变根本立场。  
+**与抵抗同行而非对抗**。认真对待、消除压力、主动沟通、深挖根源、必要时化解矛盾、达成共同协议。
 
-![img_2.png](Cache/img_2.png)
+[固定搭配和习惯用语标注]  
+**beim Auftreten von**（在...出现时）  
+**Es gibt keine... ohne...**（没有...就没有...）  
+**an die Realisierung glauben**（相信...的实现）  
+**enthält eine Botschaft**（包含信息）  
+**Ausdruck für**（...的表现形式）  
+**gebunden ist**（根植于）  
+**führt zu Blockadehaltung**（导致对抗姿态）  
+**in den Untergrund verlagern**（转入地下）  
+**Mit... gehen**（与...同行）  
+**Ernst nehmen**（认真对待）  
+**Druck wegnehmen**（消除压力）  
+**das Gespräch suchen**（主动沟通）  
+**Ursachen ergründen**（深挖根源）  
+**gemeinsame Absprachen treffen**（达成共同协议）
+************************
+
+***课堂老师口语数据笔记生成实例***：
+
+************************
+[德语原文]  
+Genau entzündet die Wiederholungsfragen. Da haben wir jetzt gar keine mehr offen. Hier haben wir auch alle gesprochen, also dieser Fall 24 kann man das letzte Woche natürlich gemeinsam gemacht gehabt, genau. Bei 25 haben wir nicht explizit. Wochen. Aber ich würde sagen, die wissen trotzdem hoch warum. Sie können in diesem Fall auch eigenständig lösen das wir haben im Prinzip alles dazugesprochen was ich zu besprechen gilt, also quasi eine Zusatzübungsaufgabe wäre das machen möchte genau gut die rote Zahlen haben wir alle besprochen, können wir abhaken, das heißt wir können weitermachen wenn sie von ihrer Seite keine Fragen mehr da sind. Also auch die ausführlichen Dinge habe ich hochgeladen. Ansonsten haben wir ja letzte Woche auch gemeinsam gelöst. Schauen Sie sich bitte noch mal an, wie die da waren, wo sie nicht da waren. Unbedingt auch anschauen. Ja, auch diese Wiederholungsfragen sind ganz grundsätzliche Dinge, die mir wichtig sind, dass sie die verstanden haben, dass sie wirklich die Grundsätze in den Prinzipien, was vertragsangebote, das, was für eine Vertragsannahme ist, diese Vertragsschutz zusammengekommen, ja, das wird ihnen später in der Praxis, wenn man mit Vertragsrecht zu tun haben, das heißt im Vertrieb.
+
+[中文翻译]  
+确切地说，复习问题已经全部解决了。现在我们没有任何遗留问题了。这里我们也都讨论过了，比如案例24上周当然是一起完成的。至于25，我们没有特别讨论。但我想说，他们应该完全明白原因。这种情况下他们也可以独立解决，因为原则上我们已经补充讨论了所有需要讲的内容，这相当于一个额外的练习任务。那些标红的数据我们都讨论过了，可以打勾确认，也就是说如果你们这边没有其他问题，我们就可以继续了。详细的材料我也已经上传了。另外，上周我们也一起处理过这些问题。请你们再仔细看看当时的内容，特别是缺席时的部分。这些复习问题都是非常基础的东西，对我来说很重要，希望你们能真正理解这些原则，比如契约要约、契约承诺的构成要件，以及契约保护的形成。是的，这些在今后实践中涉及合同法时——也就是销售领域——会对你们很有帮助。
+
+[固定搭配和习惯用语标注]  
+**Genau entzündet die Wiederholungsfragen**（确切地说复习问题已经解决）  
+**gar keine mehr offen**（没有任何遗留）  
+**im Prinzip alles dazugesprochen**（原则上已补充讨论）  
+**quasi eine Zusatzübungsaufgabe**（相当于额外练习任务）  
+**können wir abhaken**（可以打勾确认）  
+**von ihrer Seite keine Fragen mehr da sind**（你们这边没有问题）  
+**ausführlichen Dinge hochgeladen**（详细材料已上传）  
+**gemeinsam gelöst**（共同处理）  
+**Unbedingt auch anschauen**（务必查看）  
+**ganz grundsätzliche Dinge**（非常基础的内容）  
+**mit Vertragsrecht zu tun haben**（涉及合同法）  
+**das heißt im Vertrieb**（也就是销售领域）
+************************
 
 ## 项目初衷，历程
 - 这个项目的起因是，2个月的德国留学造成的需求
@@ -103,16 +201,16 @@
 - 需求，限制，结果
 
 1 . 刚开始：
-- 需求：想知道老师嘴巴里说的我们没学过的词，
-- 限制:小米15的同声传译免费而且准确度无敌高
-- 结果：我们采用了小米15的同声传译，来获得字幕
+- ***需求***：想知道老师嘴巴里说的我们没学过的词，
+- ***限制***:小米15的同声传译免费而且准确度无敌高
+- ***结果***：我们采用了小米15的同声传译，来获得字幕
 
 2 . 之后：
-- 需求：想在课后能找到那些生词
-- 限制：手动抄录整理生词，或是去翻字幕文件也太傻了
-- 结果：我们开发了第一版项目，使用python脚本和自然语言库。提取归类出每个科目每节课的新词
+- ***需求***：想在课后能找到那些生词
+- ***限制***：手动抄录整理生词，或是去翻字幕文件也太傻了
+- ***结果***：我们开发了第一版项目，使用python脚本和自然语言库。提取归类出每个科目每节课的新词
 
 3 . 最近：
-- 需求：单词背的差不多了，但是课件里的固定搭配看不太懂，一个一个查好麻烦。以及想学习课堂老师的口语表达
-- 限制：提取固定搭配和理解语义，目前只有AI能做到。DeepSeek V3价格便宜。而且网络请求需要并发。
-- 结果：我们开发了第二版项目，使用Go语言和DeepSeek V3 API。提取归类出每个科目每节课的固定搭配和老师的口语表达
+- ***需求***：单词背的差不多了，但是课件里的固定搭配看不太懂，一个一个查好麻烦。以及想学习课堂老师的口语表达
+- ***限制***：提取固定搭配和理解语义，目前只有AI能做到。DeepSeek V3价格便宜。而且网络请求需要并发。
+- ***结果***：我们开发了第二版项目，使用Go语言和DeepSeek V3 API。提取归类出每个科目每节课的固定搭配和老师的口语表达
