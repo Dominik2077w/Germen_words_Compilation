@@ -24,7 +24,7 @@ var (
 	GlobalCache *Cache
 	once        sync.Once
 	BasePath, _ = os.Getwd()
-	// 初始化 rate.Limiter：5 QPS，最大突发 15
+	// 初始化 rate.Limiter：10 QPS，
 	limiterForSync    = rate.NewLimiter(rate.Every(1*time.Millisecond), 1)
 	limiterForAPI     = rate.NewLimiter(rate.Every(100*time.Millisecond), 1)
 	DeepseekApiKey    = "在此填入你的API Key"
@@ -805,11 +805,7 @@ func ProcessArray[T any, R any](input []T, processFunc func(T) R) []R {
 }
 
 func main() {
-	NewProjectWithPath("/Users/wuchenyu/LRZ Sync+Share/GWC/Data").Run()
 	//NewProject("Data").Run()
-	//NewProject("Da").Run()
 	//initCache()
 	//GlobalCache.Save()
-	//fmt.Println(askDeepSeek(promptForOrganize, "Leistungsstörung Leistungsstörungsrecht Fall 49: Spezialpumpe Unternehmer U hat am 1.3. eine Spezialpumpe für seine Fertigungsstraße bei V verbindlich bestellt. Vereinbarter Liefertermin war der 1.7. Als V nicht fristgemäß liefert, fordert der U den V per anwaltlichen Schreiben vom 2.7. auf, bis 15.7. zu liefern. Daraufhin erfolgt Lieferung am 1.8. a) Wann tritt Fälligkeit der Lieferung ein? b) Ab wann gerät V in Verzug? 206 © Hochschule Kempten – University of Applied Sciences, Prof. Dr. Isabella Brosig-Hoschka, SoSe2025 Fall in Anlehnung an: Führich, Wirtschaftsprivatrecht, 13. Aufl. 2017, S. 204 f."))
-
 }
