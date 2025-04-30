@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -24,10 +23,11 @@ var (
 	GlobalCache *Cache
 	once        sync.Once
 	BasePath, _ = os.Getwd()
+	pythonPath  = ".venv/bin/python3"
 	// 初始化 rate.Limiter：10 QPS，
 	limiterForSync    = rate.NewLimiter(rate.Every(1*time.Millisecond), 1)
 	limiterForAPI     = rate.NewLimiter(rate.Every(100*time.Millisecond), 1)
-	DeepseekApiKey    = "在此填入你的API Key"
+	DeepseekApiKey    = "在这里填入你的API密钥"
 	promptForClassify = `请严格按以下规则处理德语文本：
 1. 提取所有名词，动词，形容词副词，专有名词，并还原为原型（动词不定式/名词单数主格/形容词原级）
 2. 名词保持首字母大写，复合词不拆解（如"Schulbuch"不拆）
@@ -463,13 +463,13 @@ func (f *File) Run() map[string]bool {
 	lines = f.processLinesOrganize(lines)
 
 	var wg sync.WaitGroup
-	var resultString string
+	var mdStringList []string
 	var hashTable map[string]bool
 
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		resultString = f.processLinesToNotizen(lines)
+		mdStringList = f.processLinesToNotizen(lines)
 	}()
 	go func() {
 		defer wg.Done()
@@ -481,7 +481,7 @@ func (f *File) Run() map[string]bool {
 	fileName := strings.TrimSuffix(filepath.Base(f.absolutePath), filepath.Ext(f.absolutePath))
 
 	// 将第一个函数返回的字符串保存到 result 文件夹中
-	err = f.saveResultToFile(resultString, fileName)
+	err = f.saveResultToFile(mdStringList, fileName)
 	if err != nil {
 		log.Fatalf("保存结果失败: %v", err)
 	}
@@ -495,11 +495,11 @@ func (f *File) processLinesOrganize(lines []string) []string {
 	})
 }
 
-func (f *File) processLinesToNotizen(lines []string) string {
+func (f *File) processLinesToNotizen(lines []string) []string {
 	lst := ProcessArray(lines, func(text string) string {
 		return askDeepSeek(promptForNotizen, text, f.absolutePath)
 	})
-	return strings.Join(lst, "\n************************\n")
+	return lst
 }
 
 func (f *File) processLinesToClassifyHash(lines []string) map[string]bool {
@@ -527,74 +527,7 @@ func (f *File) processLinesToClassifyHash(lines []string) map[string]bool {
 
 // readFileToLines 根据文件类型提取文本
 func (f *File) readFileToLines() ([]string, error) {
-	var lines []string
-
-	// 判断文件类型
-	ext := filepath.Ext(f.absolutePath)
-	if ext == ".pdf" {
-		// 使用 pdfcpu 提取 PDF 文本
-		text, err := extractTextFromPDF(f.absolutePath)
-		if err != nil {
-			return nil, fmt.Errorf("提取 PDF 文本失败: %v", err)
-		}
-
-		// 按页分割并添加到 lines
-		lines = append(lines, text...)
-	} else {
-		// 处理其他文件类型
-		file, err := os.Open(f.absolutePath)
-		if err != nil {
-			return nil, fmt.Errorf("无法打开文件: %v", err)
-		}
-		defer file.Close()
-
-		scanner := bufio.NewScanner(file)
-		var group []string
-		for scanner.Scan() {
-			group = append(group, scanner.Text())
-			if len(group) == 10 {
-				lines = append(lines, strings.Join(group, "\n"))
-				group = nil
-			}
-		}
-		// 添加剩余的行
-		if len(group) > 0 {
-			lines = append(lines, strings.Join(group, "\n"))
-		}
-
-		if err := scanner.Err(); err != nil {
-			return nil, fmt.Errorf("读取文件失败: %v", err)
-		}
-	}
-
-	return lines, nil
-}
-
-func (f *File) saveResultToFile(resultString string, name string) error {
-	// 创建 result 文件夹路径
-	resultDir := filepath.Join(filepath.Dir(f.absolutePath), "result")
-
-	// 检查 result 文件夹是否存在，不存在则创建
-	if _, err := os.Stat(resultDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(resultDir, os.ModePerm); err != nil {
-			return fmt.Errorf("创建 result 文件夹失败: %v", err)
-		}
-	}
-
-	// 构造目标文件路径
-	filePath := filepath.Join(resultDir, name+".md")
-
-	// 将内容写入文件
-	if err := os.WriteFile(filePath, []byte(resultString), 0644); err != nil {
-		return fmt.Errorf("写入文件失败: %v", err)
-	}
-
-	return nil
-}
-
-func extractTextFromPDF(pdfPath string) ([]string, error) {
-	// 调用 Python 脚本并传入 PDF 文件路径作为参数
-	cmd := exec.Command("python3", "extract_words_from_pdf.py", pdfPath)
+	cmd := exec.Command(pythonPath, "Cache/extract_words_from_pdf.py", f.absolutePath)
 	// 获取输出
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -606,10 +539,66 @@ func extractTextFromPDF(pdfPath string) ([]string, error) {
 	var result []string
 	err = json.Unmarshal(output, &result)
 	if err != nil {
-		return nil, fmt.Errorf("无法解析 JSON 数据: %v", err)
+		log.Fatalln("无法解析 JSON 数据: %v", err)
 	}
 
 	return result, nil
+}
+
+func (f *File) saveResultToFile(mdStringList []string, name string) error {
+	// 创建 result 文件夹路径
+	resultDir := filepath.Join(filepath.Dir(f.absolutePath), "result")
+
+	// 检查 result 文件夹是否存在，不存在则创建
+	if _, err := os.Stat(resultDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(resultDir, os.ModePerm); err != nil {
+			return fmt.Errorf("创建 result 文件夹失败: %v", err)
+		}
+	}
+
+	// 构造目标文件路径
+	filePath := filepath.Join(resultDir, name+".pdf")
+
+	// 将内容写入文件
+
+	return markdownPagesToPDF(mdStringList, filePath)
+}
+func markdownPagesToPDF(mdList []string, outputPath string) error {
+	jsoned, err := json.Marshal(mdList)
+	if err != nil {
+		log.Fatalf("<UNK>: %v", err)
+	}
+
+	cmd := exec.Command(pythonPath, "Cache/markdown_pages_to_pdf.py", outputPath, string(jsoned))
+	// 获取当前环境变量
+	env := os.Environ()
+
+	// 添加必要的库路径
+	env = append(env,
+		"DYLD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/glib/lib:/opt/homebrew/opt/pango/lib:/opt/homebrew/opt/harfbuzz/lib:/opt/homebrew/opt/fontconfig/lib",
+		"GI_TYPELIB_PATH=/opt/homebrew/share/gir-1.0:/opt/homebrew/lib/girepository-1.0",
+	)
+
+	// 设置命令的环境变量
+	cmd.Env = env
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("出错了:", err)
+		fmt.Println("Python脚本输出:", string(output)) // 打印出 Python 报错信息
+		return err
+	}
+	//解析output
+	var result string
+	err = json.Unmarshal(output, &result)
+	if err != nil {
+		log.Fatalf("jijijiij<UNK>: %v", err)
+	}
+	if result == "OK" {
+		return nil
+	}
+	log.Fatalln("生成PDF失败")
+	return nil
 }
 
 type ResponseData struct {
