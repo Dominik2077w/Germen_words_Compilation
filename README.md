@@ -5,6 +5,18 @@
 
 我会用清晰的段落、标题，并保证表达简洁准确。马上开始整理，稍后发给你！
 
+## 功能概述
+
+该项目的总体目标是遍历指定的目录结构，处理其中的文件（主要是德语文本或 PDF），提取有用信息并生成可读的结果文件。核心流程包括：首先调用 Python 脚本从文件中提取文本内容，将其按行分组；然后对每行文本分别调用 AI 接口（DeepSeek 大语言模型）进行分析，生成翻译笔记和分类结果；最后将生成的 Markdown 格式内容转换成 PDF 并保存。
+
+项目中 **通过 Go 的 `os/exec` 包以子进程方式调用两个 Python 脚本**：`extract_words_from_pdf.py`（提取文件文字并返回 JSON 列表）和 `markdown_pages_to_pdf.py`（将 Markdown 字符串数组转换为 PDF）。
+
+此外，程序实现了结果缓存机制，将 AI 接口的请求及返回结果存储在 `requests_cache.json` 文件中，以避免重复调用。
+
+同一个项目中还对多级目录（Project→Folder→Part→File）进行遍历和处理，通过并发方式加快处理速度，并最终在每个 `result` 文件夹下生成输出结果文件（包括 PDF 和 Markdown 文件）。
+
+---
+
 # 项目概述
 
 该项目旨在**批量处理德语文本文件并生成笔记和词汇表**。整体流程如下：在指定的项目目录下，每个一级子文件夹对应一个“Folder”，每个Folder下包含若干“Part”子文件夹，每个Part中包含多个文本或PDF文件。程序遍历每个文件，先调用DeepSeek API按要求**重排文本格式**（`promptForOrganize`），然后并行地生成中文注释笔记（`promptForNotizen`）和提取词汇清单（`promptForClassify`）。对于每个文件处理结果，生成对应的Markdown笔记，并返回该文件的词汇集合。Folder级别将各Part的词汇集合依次合并，对比前后Part的词汇增量，分别对“新增词汇”和“已有词汇”集合调用DeepSeek的格式化提示（`promptForFormat`），最终在每个Part的`result`子目录中生成`new.md`和`old.md`文件。项目的核心模块（Project、Folder、Part、File、Cache等）协同工作，形成从目录遍历到API调用再到结果保存的完整工作流。
@@ -17,13 +29,19 @@
 
 - **Part 结构体**：只有`absolutePath`字段，表示一个Part目录路径。`Part.Run()`方法遍历该目录下的所有文件（忽略子文件夹），对每个文件调用`File.Run()`并发处理，获取每个文件的词汇集合。`Part.Run()`将所有文件返回的词汇集合合并（取并集），作为该Part的总词汇集合返回给Folder。
 
-- **File 结构体**：只有`absolutePath`字段，表示一个文件（文本或PDF）的绝对路径。`File.Run()`是对单个文件的处理入口：先调用`readFileToLines()`读取文本，`processLinesOrganize()`对文本段落进行格式整理，随后并行调用`processLinesToNotizen()`生成笔记和`processLinesToClassifyHash()`生成词汇集合。处理完成后，`File.Run()`将笔记结果写入文件所在目录下的`result/<文件名>.md`，并将词汇集合返回给Part。
+- **File 结构体**：只有`absolutePath`字段，表示一个文件（文本或PDF）的绝对路径。`File.Run()`是对单个文件的处理入口：先调用`readFileToLines()`读取文本，`processLinesOrganize()`对文本段落进行格式整理，随后并行调用`processLinesToNotizen()`生成笔记和`processLinesToClassifyHash()`生成词汇集合。处理完成后，`File.Run()`将笔记结果写入文件所在目录下的`result/<文件名>.pdf`，并将词汇集合返回给Part。
 
 - **Cache 结构体**：用于请求结果缓存，包含一个读写锁`RWMutex`、字符串映射`data`、文件路径`path`和计数器`count`。程序启动时通过`initCache()`创建单例`GlobalCache`并从`requests_cache.json`加载已有缓存。每次成功调用DeepSeek API后，结果会通过`GlobalCache.Set()`写入内存，并周期性地通过`SavePer()`写入磁盘，以减少重复网络请求。
 
 - **RequestData 结构体**：用于构造DeepSeek API的请求体。包含模型名称`Model`（固定为“deepseek-chat”）和消息列表`Messages`，其中只有一条`{Role: "user", Content: prompt+text}`。
 
 - **ResponseData 结构体**：用于解析DeepSeek API的JSON响应。只关心其中`Choices[0].Message.Content`字段，即API返回的文本结果。
+
+- **并发机制**使用 `ProcessArray()` 通用并发函数，支持限速器控制（`limiterForSync`）。广泛用于 `Part`, `File`, 行处理等阶段。
+
+- **DeepSeek AI 接口**封装为 `askDeepSeek()`，支持缓存与限速（`limiterForAPI`），自动重试。避免重复请求。
+
+---
 
 ## 函数解析
 
@@ -207,3 +225,7 @@ Genau entzündet die Wiederholungsfragen. Da haben wir jetzt gar keine mehr offe
 - ***需求***：单词背的差不多了，但是课件里的固定搭配看不太懂，一个一个查好麻烦。以及想学习课堂老师的口语表达
 - ***限制***：提取固定搭配和理解语义，目前只有AI能做到。DeepSeek V3价格便宜。而且网络请求需要并发。
 - ***结果***：我们开发了第二版项目，使用Go语言和DeepSeek V3 API。提取归类出每个科目每节课的固定搭配和老师的口语表达
+
+
+### 祝大家，开心:D
+可以通过转账狠狠的奖励我吗[doge]
