@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -573,11 +574,21 @@ func markdownPagesToPDF(mdList []string, outputPath string) error {
 	// 获取当前环境变量
 	env := os.Environ()
 
-	// 添加必要的库路径
-	env = append(env,
-		"DYLD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/glib/lib:/opt/homebrew/opt/pango/lib:/opt/homebrew/opt/harfbuzz/lib:/opt/homebrew/opt/fontconfig/lib",
-		"GI_TYPELIB_PATH=/opt/homebrew/share/gir-1.0:/opt/homebrew/lib/girepository-1.0",
-	)
+	// 根据操作系统设置不同的环境变量
+	if runtime.GOOS == "darwin" {
+		// macOS环境变量
+		env = append(env,
+			"DYLD_LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/glib/lib:/opt/homebrew/opt/pango/lib:/opt/homebrew/opt/harfbuzz/lib:/opt/homebrew/opt/fontconfig/lib",
+			"GI_TYPELIB_PATH=/opt/homebrew/share/gir-1.0:/opt/homebrew/lib/girepository-1.0",
+		)
+	} else if runtime.GOOS == "windows" {
+		// Windows环境变量
+		programFiles := os.Getenv("ProgramFiles")
+		env = append(env,
+			"PATH="+programFiles+"\\GTK3-Runtime Win64\\bin;"+os.Getenv("PATH"),
+			"GI_TYPELIB_PATH="+programFiles+"\\GTK3-Runtime Win64\\lib\\girepository-1.0",
+		)
+	}
 
 	// 设置命令的环境变量
 	cmd.Env = env
