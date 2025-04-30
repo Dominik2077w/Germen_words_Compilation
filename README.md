@@ -46,7 +46,7 @@
 - **文本整理**：调用`f.processLinesOrganize(lines)`，对每个文本块使用`askDeepSeek(promptForOrganize, text)`重排文本格式，返回新的文本块列表。
 - **笔记与词汇提取并行**：启动两个goroutine：一个执行`f.processLinesToNotizen(lines)`，即对每个文本块调用`askDeepSeek(promptForNotizen, text)`生成带有德文原文、中文翻译和习语标注的笔记段落，并用分隔符拼接成一个字符串；另一个执行`f.processLinesToClassifyHash(lines)`，即对每个文本块调用`askDeepSeek(promptForClassify, text)`提取词汇，每个块返回多行单词列表，再合并这些列表中所有单词为一个`map[string]bool`集合（去重）。两者完成后，用WaitGroup等待。
 
-处理结束后，`File.Run()`取当前文件名（不含扩展名）构造结果文件名，将笔记结果写入同级目录下的`result/<文件名>.md`。函数最终返回该文件的词汇集合（`map[string]bool`）给上层调用。
+处理结束后，`File.Run()`取当前文件名（不含扩展名）构造结果文件名，将笔记结果写入同级目录下的`result/<文件名>.pdf`。函数最终返回该文件的词汇集合（`map[string]bool`）给上层调用。
 
 ### ProcessArray
 
@@ -91,8 +91,8 @@ Project/                           # 顶层项目目录
 │   │   ├── file1.txt              # 文本文件1
 │   │   ├── file2.txt              # 文本文件2
 │   │   └── result/                # 该Part的结果目录
-│   │       ├── file1.md           # file1的笔记结果
-│   │       ├── file2.md           # file2的笔记结果
+│   │       ├── file1.pdf          # file1的笔记结果
+│   │       ├── file2.pdf          # file2的笔记结果
 │   │       ├── new.md             # 新增词汇的Markdown文件
 │   │       └── old.md             # 已有词汇的Markdown文件
 │   └── Part2/

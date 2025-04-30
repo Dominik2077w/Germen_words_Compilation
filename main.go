@@ -27,8 +27,8 @@ var (
 	pythonPath  = ".venv/bin/python3"
 	// 初始化 rate.Limiter：10 QPS，
 	limiterForSync    = rate.NewLimiter(rate.Every(1*time.Millisecond), 1)
-	limiterForAPI     = rate.NewLimiter(rate.Every(100*time.Millisecond), 1)
-	DeepseekApiKey    = "在这里填入你的API密钥"
+	limiterForAPI     = rate.NewLimiter(rate.Every(130*time.Millisecond), 1)
+	DeepseekApiKey    = "sk-填入你的API密钥"
 	promptForClassify = `请严格按以下规则处理德语文本：
 1. 提取所有名词，动词，形容词副词，专有名词，并还原为原型（动词不定式/名词单数主格/形容词原级）
 2. 名词保持首字母大写，复合词不拆解（如"Schulbuch"不拆）
@@ -333,7 +333,7 @@ func (f *Folder) Run() {
 	setFromPart := ProcessArray(partList, func(path string) map[string]bool {
 		return NewPart(path).Run()
 	})
-	existedSet := make(map[string]bool)
+	existedSet := make(map[string]bool, 0)
 	diffNewSetList := make([]map[string]bool, 0)
 	diffOldSetList := make([]map[string]bool, 0)
 	for _, currentSet := range setFromPart {
@@ -512,7 +512,7 @@ func (f *File) processLinesToClassifyHash(lines []string) map[string]bool {
 		set := make(map[string]bool, 0)
 		for _, word := range strings.Split(str, "\n") {
 			if word != "" {
-				set[word] = true
+				set[strings.TrimSpace(word)] = true
 			}
 		}
 		sets = append(sets, set)
@@ -626,6 +626,7 @@ func askDeepSeekFormat(set map[string]bool, status string) string {
 		texts = append(texts, text)
 	}
 	sort.Strings(texts)
+
 	ans := make([]string, 0)
 	for len(texts) > 250 {
 		text := texts[:250]
@@ -651,6 +652,26 @@ type RequestData struct {
 		Content string `json:"content"`
 	} `json:"messages"`
 	Stream bool `json:"stream"`
+}
+
+// 添加重试逻辑和错误处理
+func readResponseBody(resp *http.Response) ([]byte, error) {
+	maxRetries := 6 * 30
+	for i := 0; i < maxRetries; i++ {
+		body, err := io.ReadAll(resp.Body)
+		if err == nil {
+			return body, nil
+		}
+
+		// 如果是流错误,等待后重试
+		if strings.Contains(err.Error(), "stream error") {
+			time.Sleep(time.Second * time.Duration(10))
+			continue
+		}
+
+		return nil, err
+	}
+	return nil, fmt.Errorf("达到最大重试次数")
 }
 
 func askDeepSeek(prompt string, text string, status string) string {
@@ -701,7 +722,7 @@ func askDeepSeek(prompt string, text string, status string) string {
 				}(resp.Body)
 
 				if resp.StatusCode == http.StatusOK {
-					if body, err := io.ReadAll(resp.Body); err != nil {
+					if body, err := readResponseBody(resp); err != nil {
 						step = fmt.Sprintf("读取响应体失败: %v", err)
 					} else {
 						bodyStr := strings.TrimSpace(string(body))
@@ -808,4 +829,5 @@ func main() {
 	//NewProject("Data").Run()
 	//initCache()
 	//GlobalCache.Save()
+	//fmt.Println(askDeepSeek(promptForNotizen, "Was sind eigentlich Phasenmodelle im Projektmanagement? Das, was jetzt kommt, ist, dass wir schrittweise anhand des klassischen Projektmanagements durch die Projektmanagement-Phasen gehen. Projektmanagement-Phasen waren welche? Ich muss auch immer nachschreiben. Schwerter bitte. Initialisierung.\n", "666"))
 }
