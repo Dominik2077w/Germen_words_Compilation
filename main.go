@@ -27,7 +27,7 @@ var (
 	pythonPath  = ".venv/bin/python3"
 	// 初始化 rate.Limiter：10 QPS，
 	limiterForSync    = rate.NewLimiter(rate.Every(1*time.Millisecond), 1)
-	limiterForAPI     = rate.NewLimiter(rate.Every(130*time.Millisecond), 1)
+	limiterForAPI     = rate.NewLimiter(rate.Every(2000*time.Millisecond), 1)
 	DeepseekApiKey    = "sk-填入你的API密钥"
 	promptForClassify = `请严格按以下规则处理德语文本：
 1. 提取所有名词，动词，形容词副词，专有名词，并还原为原型（动词不定式/名词单数主格/形容词原级）
@@ -44,13 +44,12 @@ Wort3
 	promptForNotizen = `请按照以下规则处理德语文本：
 1. **结构要求**
 - 按此顺序呈现：
-[德语原文] → [中文翻译] → [固定搭配和习惯用语标注]
+[德语原文] → [中文翻译]
 2. **标注规范**
-- 固定搭配和习惯用语用**加粗**标出，格式：**原词**（中文解释）
+- 固定搭配和习惯用语在德语原文以及中文翻译中用**加粗**标出，格式：**原词**（中文解释)标注出
 - 专业术语附加括号注原文，例：镜像神经元（Spiegelneuronen）
-- 尽可能多的找出固定搭配和习惯用语
+- 尽可能多的找出固定搭配和习惯用语!!!
 3. **扩展逻辑**
-- 若句子含多个搭配，分行列举
 - 文化特定表达需说明背景，例："Murmelgruppe"需注"源自德国教学法"
 4. **风格控制**
 - 中文翻译采用学术口语混合风格
@@ -61,9 +60,7 @@ Wort3
     "[德语原文]
     xxxxxxxx
     [中文翻译] 
-    xxxxxxxx
-    [固定搭配标注]
-    xxxxxxxx  "
+    xxxxxxxx"
 
 **执行优先级**：保留原文完整性 > 搭配标注准确性 > 翻译可读性
 以下是需要处理的文本：
@@ -826,7 +823,7 @@ func ProcessArray[T any, R any](input []T, processFunc func(T) R) []R {
 }
 
 func main() {
-	//NewProject("Data").Run()
+	NewProject("Data").Run()
 	//initCache()
 	//GlobalCache.Save()
 	//fmt.Println(askDeepSeek(promptForNotizen, "Was sind eigentlich Phasenmodelle im Projektmanagement? Das, was jetzt kommt, ist, dass wir schrittweise anhand des klassischen Projektmanagements durch die Projektmanagement-Phasen gehen. Projektmanagement-Phasen waren welche? Ich muss auch immer nachschreiben. Schwerter bitte. Initialisierung.\n", "666"))
