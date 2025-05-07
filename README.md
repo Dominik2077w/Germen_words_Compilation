@@ -147,8 +147,11 @@
    │   │      ├─ Neue.md
    │   │      ├─ note1.md
    │   │      ├─ note1.pdf(可选)
+   │   │      ├─ MinerUXXX.md
+   │   │      ├─ MinerUXXX.pdf(可选)
    │   │      ├─ note2.pdf(可选)
    │   │      └─ note2.md
+   │   │      
    │   └─ Part_2/  
    │       └─ ^^^^^^ 
    │
