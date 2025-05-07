@@ -22,7 +22,7 @@ class Constants:
     type3 = ' ' * 15
     BASE_DIR = get_base_dir()
     CACHE_DIR = BASE_DIR / 'Cashes'
-    DEEPSEEK_API_KEY = 'sk-8f5badd481c4492883dd2904d98a6a9a'  # 替换
+    DEEPSEEK_API_KEY = '替换成你自己的Deepseek_API'  # 替换
 
     # File paths
     USED_DICT_PATH = CACHE_DIR / 'used_dict.json'
